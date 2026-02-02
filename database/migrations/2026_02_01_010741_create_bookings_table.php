@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('booking_number')->unique();
             $table->foreignId('customer_id')->constrained()->cascadeOnDelete();
             $table->foreignId('car_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete(); // Link to authenticated user (optional)
             $table->foreignId('pickup_location_id')->constrained('locations')->cascadeOnDelete();
             $table->foreignId('dropoff_location_id')->constrained('locations')->cascadeOnDelete();
             $table->dateTime('pickup_date');
@@ -29,6 +30,8 @@ return new class extends Migration
             $table->decimal('total_amount', 10, 2);
             $table->decimal('deposit_amount', 10, 2)->default(0);
             $table->string('status')->default('pending');
+            $table->uuid('payment_token')->unique()->nullable(); // Unique token for secure balance payment links
+            $table->dateTime('payment_reminder_sent_at')->nullable(); // Track when reminder was sent
             $table->text('notes')->nullable();
             $table->timestamps();
         });

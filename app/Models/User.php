@@ -58,4 +58,12 @@ class User extends Authenticatable implements FilamentUser
     {
         return true; // Allow all authenticated users to access admin panel
     }
+
+    /**
+     * Get the user's bookings.
+     */
+    public function bookings(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Booking::class);
+    }
 }

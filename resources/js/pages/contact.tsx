@@ -1,4 +1,4 @@
-import { Head, Link } from "@inertiajs/react";
+import { Head, Link, useForm } from "@inertiajs/react";
 import { Layout } from "@/components/frontend/layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,12 +10,25 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { MapPin, Phone, Mail, Send } from "lucide-react";
 import { FadeUpReveal, TextReveal } from "@/components/ui/text-reveal";
+import { FormEventHandler } from "react";
 
 export default function Contact() {
+    const { data, setData, post, processing, errors } = useForm({
+        name: "",
+        email: "",
+        phone: "",
+        subject: "",
+        message: "",
+    });
+
+    const submit: FormEventHandler = (e) => {
+        e.preventDefault();
+        post("/contact");
+    };
+
     return (
         <Layout>
             <Head title="Contact Us - MC Rental Cars" />
@@ -54,111 +67,92 @@ export default function Contact() {
                                 </p>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <form onSubmit={submit} className="space-y-6">
                                 <div className="space-y-2">
-                                    <Label htmlFor="firstName" className="text-foreground font-bold text-xs uppercase tracking-widest">
-                                        First Name *
+                                    <Label htmlFor="name" className="text-foreground font-bold text-xs uppercase tracking-widest">
+                                        Full Name *
                                     </Label>
                                     <Input
-                                        id="firstName"
-                                        placeholder="Enter your first name"
+                                        id="name"
+                                        value={data.name}
+                                        onChange={(e) => setData("name", e.target.value)}
+                                        placeholder="Enter your full name"
                                         className="h-14 bg-muted/50 border-border rounded-xl focus:border-secondary"
+                                        required
                                     />
+                                    {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
                                 </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="lastName" className="text-foreground font-bold text-xs uppercase tracking-widest">
-                                        Last Name *
-                                    </Label>
-                                    <Input
-                                        id="lastName"
-                                        placeholder="Enter your last name"
-                                        className="h-14 bg-muted/50 border-border rounded-xl focus:border-secondary"
-                                    />
-                                </div>
-                            </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <Label htmlFor="email" className="text-foreground font-bold text-xs uppercase tracking-widest">
-                                        Email *
-                                    </Label>
-                                    <Input
-                                        id="email"
-                                        type="email"
-                                        placeholder="Enter your email"
-                                        className="h-14 bg-muted/50 border-border rounded-xl focus:border-secondary"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="phone" className="text-foreground font-bold text-xs uppercase tracking-widest">
-                                        Phone *
-                                    </Label>
-                                    <Input
-                                        id="phone"
-                                        type="tel"
-                                        placeholder="Enter your phone number"
-                                        className="h-14 bg-muted/50 border-border rounded-xl focus:border-secondary"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label className="text-foreground font-bold text-xs uppercase tracking-widest">
-                                    Choose a topic
-                                </Label>
-                                <Select>
-                                    <SelectTrigger className="h-14 bg-muted/50 border-border rounded-xl">
-                                        <SelectValue placeholder="Select a topic..." />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="rental">Car Rental Inquiry</SelectItem>
-                                        <SelectItem value="booking">Booking Issue</SelectItem>
-                                        <SelectItem value="feedback">Feedback</SelectItem>
-                                        <SelectItem value="other">Other</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <div className="space-y-3">
-                                <Label className="text-foreground font-bold text-xs uppercase tracking-widest">
-                                    Preferred Contact Method
-                                </Label>
-                                <RadioGroup defaultValue="email" className="flex flex-wrap gap-6">
-                                    <div className="flex items-center space-x-2">
-                                        <RadioGroupItem value="email" id="contact-email" />
-                                        <Label htmlFor="contact-email" className="font-normal text-foreground">
-                                            Email
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="email" className="text-foreground font-bold text-xs uppercase tracking-widest">
+                                            Email *
                                         </Label>
+                                        <Input
+                                            id="email"
+                                            type="email"
+                                            value={data.email}
+                                            onChange={(e) => setData("email", e.target.value)}
+                                            placeholder="Enter your email"
+                                            className="h-14 bg-muted/50 border-border rounded-xl focus:border-secondary"
+                                            required
+                                        />
+                                        {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
                                     </div>
-                                    <div className="flex items-center space-x-2">
-                                        <RadioGroupItem value="phone" id="contact-phone" />
-                                        <Label htmlFor="contact-phone" className="font-normal text-foreground">
-                                            Phone Call
+                                    <div className="space-y-2">
+                                        <Label htmlFor="phone" className="text-foreground font-bold text-xs uppercase tracking-widest">
+                                            Phone
                                         </Label>
+                                        <Input
+                                            id="phone"
+                                            type="tel"
+                                            value={data.phone}
+                                            onChange={(e) => setData("phone", e.target.value)}
+                                            placeholder="Enter your phone number"
+                                            className="h-14 bg-muted/50 border-border rounded-xl focus:border-secondary"
+                                        />
+                                        {errors.phone && <p className="text-sm text-red-500">{errors.phone}</p>}
                                     </div>
-                                    <div className="flex items-center space-x-2">
-                                        <RadioGroupItem value="walkin" id="contact-walkin" />
-                                        <Label htmlFor="contact-walkin" className="font-normal text-foreground">
-                                            Walk In
-                                        </Label>
-                                    </div>
-                                </RadioGroup>
-                            </div>
+                                </div>
 
-                            <div className="space-y-2">
-                                <Label className="text-foreground font-bold text-xs uppercase tracking-widest">
-                                    Message
-                                </Label>
-                                <textarea
-                                    placeholder="Tell us about your inquiry..."
-                                    className="w-full h-32 px-4 py-3 bg-muted/50 border border-border rounded-xl resize-none focus:outline-none focus:border-secondary text-foreground"
-                                />
-                            </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="subject" className="text-foreground font-bold text-xs uppercase tracking-widest">
+                                        Subject
+                                    </Label>
+                                    <Input
+                                        id="subject"
+                                        value={data.subject}
+                                        onChange={(e) => setData("subject", e.target.value)}
+                                        placeholder="Subject of your inquiry"
+                                        className="h-14 bg-muted/50 border-border rounded-xl focus:border-secondary"
+                                    />
+                                    {errors.subject && <p className="text-sm text-red-500">{errors.subject}</p>}
+                                </div>
 
-                            <Button className="w-full md:w-auto h-14 px-10 bg-secondary hover:bg-secondary/90 text-white font-bold uppercase tracking-widest rounded-xl">
-                                <Send className="w-4 h-4 mr-2" />
-                                Send Message
-                            </Button>
+                                <div className="space-y-2">
+                                    <Label htmlFor="message" className="text-foreground font-bold text-xs uppercase tracking-widest">
+                                        Message *
+                                    </Label>
+                                    <textarea
+                                        id="message"
+                                        value={data.message}
+                                        onChange={(e) => setData("message", e.target.value)}
+                                        placeholder="Tell us about your inquiry..."
+                                        className="w-full h-32 px-4 py-3 bg-muted/50 border border-border rounded-xl resize-none focus:outline-none focus:border-secondary text-foreground"
+                                        required
+                                    />
+                                    {errors.message && <p className="text-sm text-red-500">{errors.message}</p>}
+                                </div>
+
+                                <Button
+                                    type="submit"
+                                    disabled={processing}
+                                    className="w-full md:w-auto h-14 px-10 bg-secondary hover:bg-secondary/90 text-white font-bold uppercase tracking-widest rounded-xl"
+                                >
+                                    <Send className="w-4 h-4 mr-2" />
+                                    {processing ? "Sending..." : "Send Message"}
+                                </Button>
+                            </form>
                         </div>
                     </FadeUpReveal>
 

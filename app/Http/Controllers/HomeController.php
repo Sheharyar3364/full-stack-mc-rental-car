@@ -16,16 +16,17 @@ class HomeController extends Controller
     {
         $featuredCars = Car::with('category')
             ->where('is_active', true)
+            ->where('is_featured', true)
             ->where('status', CarStatus::Available)
-            ->limit(6)
+            ->limit(8)
             ->get()
             ->map(fn($car) => [
                 'id' => $car->id,
-                'name' => $car->model,
+                'name' => "{$car->year} {$car->brand} {$car->model}",
                 'brand' => $car->brand,
-                'type' => $car->category?->name ?? 'Sedan',
+                'type' => $car->category?->name ?? 'Luxury',
                 'image' => $car->image ?? 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=800',
-                'price' => (float) $car->daily_rate,
+                'price' => $car->daily_rate ?? $car->category?->daily_rate ?? 450,
                 'seats' => $car->seats,
                 'fuel' => $car->fuel_type?->value ?? 'Petrol',
                 'transmission' => $car->transmission?->value ?? 'Automatic',

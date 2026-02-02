@@ -51,8 +51,8 @@ export function Navbar() {
     return (
         <nav
             className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled
-                    ? "bg-background/80 backdrop-blur-2xl border-b border-border/30 py-3 shadow-lg shadow-black/5"
-                    : "bg-black/30 backdrop-blur-md py-5"
+                ? "bg-background/80 backdrop-blur-2xl border-b border-border/30 py-3 shadow-lg shadow-black/5"
+                : "bg-black/30 backdrop-blur-md py-5"
                 }`}
         >
             <div className="container mx-auto px-6 flex items-center justify-between">
@@ -64,8 +64,8 @@ export function Navbar() {
                         transition={{ type: "spring", stiffness: 400, damping: 17 }}
                     >
                         <div className={`rounded-full overflow-hidden ring-2 ring-offset-2 transition-all ${isScrolled
-                                ? "ring-secondary/20 ring-offset-background"
-                                : "ring-white/20 ring-offset-black/50"
+                            ? "ring-secondary/20 ring-offset-background"
+                            : "ring-white/20 ring-offset-black/50"
                             }`}>
                             <img
                                 src="/logo.png"
@@ -92,10 +92,10 @@ export function Navbar() {
                             <Link href={link.href}>
                                 <motion.div
                                     className={`relative px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-1.5 cursor-pointer group ${isActive(link.href)
-                                            ? "text-secondary"
-                                            : isScrolled
-                                                ? "text-foreground/80 hover:text-foreground"
-                                                : "text-white/90 hover:text-white"
+                                        ? "text-secondary"
+                                        : isScrolled
+                                            ? "text-foreground/80 hover:text-foreground"
+                                            : "text-white/90 hover:text-white"
                                         }`}
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.98 }}
@@ -165,11 +165,28 @@ export function Navbar() {
                         <ModeToggle className={isScrolled ? "text-foreground hover:bg-muted/50" : "text-white hover:bg-white/10"} />
                     </div>
 
+                    {/* My Account Link - shows when user is authenticated */}
+                    <Link href="/account">
+                        <motion.div
+                            className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer ${isActive("/account")
+                                    ? "text-secondary bg-secondary/10"
+                                    : isScrolled
+                                        ? "text-foreground/80 hover:text-foreground hover:bg-muted/50"
+                                        : "text-white/90 hover:text-white hover:bg-white/10"
+                                }`}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => playClick()}
+                        >
+                            My Account
+                        </motion.div>
+                    </Link>
+
                     <Link href="/cars">
                         <MagneticButton
                             className={`relative h-12 px-8 rounded-xl font-black text-sm uppercase tracking-wider transition-all overflow-hidden group ${isScrolled
-                                    ? "bg-gradient-to-r from-secondary to-blue-600 text-white shadow-lg shadow-secondary/30"
-                                    : "bg-white text-black shadow-xl"
+                                ? "bg-gradient-to-r from-secondary to-blue-600 text-white shadow-lg shadow-secondary/30"
+                                : "bg-white text-black shadow-xl"
                                 }`}
                             onClick={() => playClick()}
                         >
@@ -182,8 +199,8 @@ export function Navbar() {
                 {/* Mobile Toggle */}
                 <motion.button
                     className={`lg:hidden w-12 h-12 rounded-xl flex items-center justify-center border transition-all ${isScrolled
-                            ? "bg-muted/50 text-foreground border-border/50"
-                            : "bg-white/10 text-white border-white/20 backdrop-blur-md"
+                        ? "bg-muted/50 text-foreground border-border/50"
+                        : "bg-white/10 text-white border-white/20 backdrop-blur-md"
                         }`}
                     onClick={() => {
                         setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -238,8 +255,8 @@ export function Navbar() {
                                     <Link
                                         href={link.href}
                                         className={`text-2xl font-black py-4 px-4 block transition-all rounded-xl ${isActive(link.href)
-                                                ? "text-secondary bg-secondary/10"
-                                                : "text-foreground hover:text-secondary hover:bg-muted/50"
+                                            ? "text-secondary bg-secondary/10"
+                                            : "text-foreground hover:text-secondary hover:bg-muted/50"
                                             }`}
                                         onClick={() => setIsMobileMenuOpen(false)}
                                     >

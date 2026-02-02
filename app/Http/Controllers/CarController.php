@@ -11,32 +11,105 @@ use Inertia\Response;
 class CarController extends Controller
 {
     /**
-     * Display a listing of all available cars.
+     * Display a listing of all available cars with filters.
      */
     public function index(): Response
     {
-        $cars = Car::with('category')
+        $query = Car::with('category')
             ->where('is_active', true)
-            ->where('status', CarStatus::Available)
-            ->get()
-            ->map(fn($car) => $this->transformCar($car));
+            ->where('status', CarStatus::Available);
 
-        $categories = CarCategory::all()->map(fn($cat) => [
+        // Search filter
+        if (request('search')) {
+            $search = request('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('brand', 'like', "%{$search}%")
+                    ->orWhere('model', 'like', "%{$search}%");
+            });
+        }
+
+        // Brand filter
+        if (request('brands')) {
+            $brands = is_array(request('brands')) ? request('brands') : [request('brands')];
+            $query->whereIn('brand', $brands);
+        }
+
+        // Category filter
+        if (request('categories')) {
+            $categories = is_array(request('categories')) ? request('categories') : [request('categories')];
+            $query->whereIn('car_category_id', $categories);
+        }
+
+        // Price range filter
+        if (request('min_price')) {
+            $query->where(function ($q) {
+                $minPrice = request('min_price');
+                $q->where('daily_rate', '>=', $minPrice)
+                    ->orWhereHas('category', function ($cq) use ($minPrice) {
+                        $cq->where('daily_rate', '>=', $minPrice);
+                    });
+            });
+        }
+
+        if (request('max_price')) {
+            $query->where(function ($q) {
+                $maxPrice = request('max_price');
+                $q->where('daily_rate', '<=', $maxPrice)
+                    ->orWhereHas('category', function ($cq) use ($maxPrice) {
+                        $cq->where('daily_rate', '<=', $maxPrice);
+                    });
+            });
+        }
+
+        // Sorting
+        $sortBy = request('sort', 'featured');
+        match ($sortBy) {
+            'price-low' => $query->orderByRaw('COALESCE(daily_rate, (SELECT daily_rate FROM car_categories WHERE id = cars.car_category_id)) ASC'),
+            'price-high' => $query->orderByRaw('COALESCE(daily_rate, (SELECT daily_rate FROM car_categories WHERE id = cars.car_category_id)) DESC'),
+            'newest' => $query->orderBy('year', 'desc'),
+            default => $query->orderBy('is_featured', 'desc')->orderBy('created_at', 'desc'),
+        };
+
+        // Pagination
+        $perPage = request('per_page', 12);
+        $paginated = $query->paginate($perPage);
+
+        $cars = $paginated->through(fn($car) => $this->transformCar($car));
+
+        // Get all categories and brands for filters
+        $allCategories = CarCategory::all()->map(fn($cat) => [
             'id' => $cat->id,
             'name' => $cat->name,
             'slug' => strtolower(str_replace(' ', '-', $cat->name)),
         ]);
 
-        $brands = Car::where('is_active', true)
+        $allBrands = Car::where('is_active', true)
             ->distinct()
             ->pluck('brand')
             ->filter()
+            ->sort()
             ->values();
 
         return Inertia::render('cars/index', [
-            'cars' => $cars,
-            'categories' => $categories,
-            'brands' => $brands,
+            'cars' => $cars->items(),
+            'pagination' => [
+                'current_page' => $paginated->currentPage(),
+                'last_page' => $paginated->lastPage(),
+                'per_page' => $paginated->perPage(),
+                'total' => $paginated->total(),
+                'from' => $paginated->firstItem(),
+                'to' => $paginated->lastItem(),
+            ],
+            'categories' => $allCategories,
+            'brands' => $allBrands,
+            'filters' => [
+                'search' => request('search'),
+                'brands' => request('brands', []),
+                'categories' => request('categories', []),
+                'min_price' => request('min_price'),
+                'max_price' => request('max_price'),
+                'sort' => request('sort', 'featured'),
+            ],
         ]);
     }
 
@@ -48,6 +121,20 @@ class CarController extends Controller
         $car->load('category');
 
         $carData = $this->transformCar($car, true);
+
+        // Get booked dates for this car (pending and confirmed bookings)
+        $bookedDates = $car->bookings()
+            ->whereIn('status', [
+                \App\Enums\BookingStatus::Pending,
+                \App\Enums\BookingStatus::Confirmed,
+                \App\Enums\BookingStatus::Active,
+            ])
+            ->where('dropoff_date', '>=', now())
+            ->get()
+            ->map(fn($booking) => [
+                'start' => $booking->pickup_date->format('Y-m-d'),
+                'end' => $booking->dropoff_date->format('Y-m-d'),
+            ]);
 
         $relatedCars = Car::with('category')
             ->where('is_active', true)
@@ -64,6 +151,7 @@ class CarController extends Controller
         return Inertia::render('cars/show', [
             'car' => $carData,
             'relatedCars' => $relatedCars,
+            'bookedDates' => $bookedDates,
         ]);
     }
 
@@ -74,12 +162,12 @@ class CarController extends Controller
     {
         $data = [
             'id' => $car->id,
-            'name' => $car->model,
+            'name' => "{$car->year} {$car->brand} {$car->model}",
             'brand' => $car->brand,
-            'type' => $car->category?->name ?? 'Sedan',
+            'type' => $car->category?->name ?? 'Luxury',
             'year' => $car->year,
             'image' => $car->image ?? 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=800',
-            'price' => (float) $car->daily_rate,
+            'price' => $car->daily_rate ?? $car->category?->daily_rate ?? 450,
             'seats' => $car->seats,
             'fuel' => $car->fuel_type?->value ?? 'Petrol',
             'transmission' => $car->transmission?->value ?? 'Automatic',

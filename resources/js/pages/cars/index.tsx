@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Head, Link } from "@inertiajs/react";
+import { useState, useEffect } from "react";
+import { Head, Link, router } from "@inertiajs/react";
 import { Layout } from "@/components/frontend/layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,84 +24,106 @@ import {
     Filter,
     X,
     ChevronRight,
+    ChevronLeft,
 } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 
-const carBrands = ["BMW", "Mercedes", "Bentley", "Porsche", "Audi", "Rolls Royce"];
-const carTypes = ["Sedan", "SUV", "Sports", "Luxury", "Convertible", "Coupe"];
+interface Car {
+    id: number;
+    name: string;
+    brand: string;
+    type: string;
+    image: string;
+    price: number;
+    seats: number;
+    fuel: string;
+    transmission: string;
+}
 
-const cars = [
-    {
-        id: 1,
-        name: "BMW 7 Series",
-        brand: "BMW",
-        type: "Sedan",
-        image: "https://images.unsplash.com/photo-1555215695-3004980ad54e?w=800",
-        price: 450,
-        seats: 5,
-        fuel: "Petrol",
-        transmission: "Automatic",
-    },
-    {
-        id: 2,
-        name: "Mercedes S-Class",
-        brand: "Mercedes",
-        type: "Luxury",
-        image: "https://images.unsplash.com/photo-1617531653332-bd46c24f2068?w=800",
-        price: 500,
-        seats: 5,
-        fuel: "Petrol",
-        transmission: "Automatic",
-    },
-    {
-        id: 3,
-        name: "Bentley Bentayga",
-        brand: "Bentley",
-        type: "SUV",
-        image: "https://images.unsplash.com/photo-1563720223185-11003d516935?w=800",
-        price: 650,
-        seats: 7,
-        fuel: "Petrol",
-        transmission: "Automatic",
-    },
-    {
-        id: 4,
-        name: "Porsche 911",
-        brand: "Porsche",
-        type: "Sports",
-        image: "https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=800",
-        price: 550,
-        seats: 2,
-        fuel: "Petrol",
-        transmission: "Automatic",
-    },
-    {
-        id: 5,
-        name: "Range Rover Sport",
-        brand: "Land Rover",
-        type: "SUV",
-        image: "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=800",
-        price: 500,
-        seats: 7,
-        fuel: "Diesel",
-        transmission: "Automatic",
-    },
-    {
-        id: 6,
-        name: "Audi RS7",
-        brand: "Audi",
-        type: "Sports",
-        image: "https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=800",
-        price: 480,
-        seats: 4,
-        fuel: "Petrol",
-        transmission: "Automatic",
-    },
-];
+interface Category {
+    id: number;
+    name: string;
+    slug: string;
+}
 
-export default function CarsIndex() {
+interface Pagination {
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+    from: number | null;
+    to: number | null;
+}
+
+interface Filters {
+    search?: string;
+    brands?: string[];
+    categories?: number[];
+    min_price?: number;
+    max_price?: number;
+    sort?: string;
+}
+
+interface CarsIndexProps {
+    cars: Car[];
+    categories: Category[];
+    brands: string[];
+    pagination: Pagination;
+    filters: Filters;
+}
+
+export default function CarsIndex({ cars, categories, brands, pagination, filters }: CarsIndexProps) {
     const [showFilters, setShowFilters] = useState(false);
-    const [priceRange, setPriceRange] = useState([0, 1000]);
+    const [search, setSearch] = useState(filters.search || "");
+    const [selectedBrands, setSelectedBrands] = useState<string[]>(filters.brands || []);
+    const [selectedCategories, setSelectedCategories] = useState<number[]>(filters.categories || []);
+    const [priceRange, setPriceRange] = useState<[number, number]>([
+        filters.min_price || 0,
+        filters.max_price || 2000,
+    ]);
+    const [sortBy, setSortBy] = useState(filters.sort || "featured");
+
+    const applyFilters = () => {
+        const params: any = {};
+
+        if (search) params.search = search;
+        if (selectedBrands.length) params.brands = selectedBrands;
+        if (selectedCategories.length) params.categories = selectedCategories;
+        if (priceRange[0] > 0) params.min_price = priceRange[0];
+        if (priceRange[1] < 2000) params.max_price = priceRange[1];
+        if (sortBy !== "featured") params.sort = sortBy;
+
+        router.get("/cars", params, {
+            preserveState: true,
+            preserveScroll: true,
+        });
+    };
+
+    const toggleBrand = (brand: string) => {
+        setSelectedBrands(prev =>
+            prev.includes(brand) ? prev.filter(b => b !== brand) : [...prev, brand]
+        );
+    };
+
+    const toggleCategory = (categoryId: number) => {
+        setSelectedCategories(prev =>
+            prev.includes(categoryId) ? prev.filter(c => c !== categoryId) : [...prev, categoryId]
+        );
+    };
+
+    const goToPage = (page: number) => {
+        const params: any = { page };
+        if (search) params.search = search;
+        if (selectedBrands.length) params.brands = selectedBrands;
+        if (selectedCategories.length) params.categories = selectedCategories;
+        if (priceRange[0] > 0) params.min_price = priceRange[0];
+        if (priceRange[1] < 2000) params.max_price = priceRange[1];
+        if (sortBy !== "featured") params.sort = sortBy;
+
+        router.get("/cars", params, {
+            preserveScroll: true,
+        });
+    };
 
     return (
         <Layout>
@@ -132,6 +154,9 @@ export default function CarsIndex() {
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                             <Input
                                 placeholder="Search by model, brand..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                onKeyDown={(e) => e.key === "Enter" && applyFilters()}
                                 className="pl-12 h-14 rounded-xl border-border bg-card text-base"
                             />
                         </div>
@@ -142,7 +167,7 @@ export default function CarsIndex() {
                         >
                             <Filter className="w-5 h-5" /> Filters
                         </Button>
-                        <Select defaultValue="featured">
+                        <Select value={sortBy} onValueChange={setSortBy}>
                             <SelectTrigger className="h-14 w-full lg:w-48 rounded-xl border-border bg-card">
                                 <SelectValue placeholder="Sort by" />
                             </SelectTrigger>
@@ -153,6 +178,12 @@ export default function CarsIndex() {
                                 <SelectItem value="newest">Newest First</SelectItem>
                             </SelectContent>
                         </Select>
+                        <Button
+                            onClick={applyFilters}
+                            className="h-14 px-8 rounded-xl bg-secondary text-white hover:bg-secondary/90"
+                        >
+                            Apply Filters
+                        </Button>
                     </div>
 
                     <div className="flex gap-12">
@@ -175,9 +206,9 @@ export default function CarsIndex() {
                                 <h4 className="font-semibold text-foreground mb-4">Price Range</h4>
                                 <Slider
                                     value={priceRange}
-                                    onValueChange={setPriceRange}
+                                    onValueChange={(value) => setPriceRange(value as [number, number])}
                                     min={0}
-                                    max={1000}
+                                    max={2000}
                                     step={50}
                                     className="mb-4"
                                 />
@@ -190,10 +221,15 @@ export default function CarsIndex() {
                             {/* Brand Filter */}
                             <Card className="p-6 rounded-2xl border-border">
                                 <h4 className="font-semibold text-foreground mb-4">Brand</h4>
-                                <div className="space-y-3">
-                                    {carBrands.map((brand) => (
+                                <div className="space-y-3 max-h-64 overflow-y-auto">
+                                    {brands.map((brand) => (
                                         <div key={brand} className="flex items-center space-x-3">
-                                            <Checkbox id={brand} className="rounded" />
+                                            <Checkbox
+                                                id={brand}
+                                                checked={selectedBrands.includes(brand)}
+                                                onCheckedChange={() => toggleBrand(brand)}
+                                                className="rounded"
+                                            />
                                             <Label
                                                 htmlFor={brand}
                                                 className="text-sm text-muted-foreground hover:text-foreground cursor-pointer"
@@ -205,18 +241,23 @@ export default function CarsIndex() {
                                 </div>
                             </Card>
 
-                            {/* Body Type Filter */}
+                            {/* Category Filter */}
                             <Card className="p-6 rounded-2xl border-border">
-                                <h4 className="font-semibold text-foreground mb-4">Body Type</h4>
+                                <h4 className="font-semibold text-foreground mb-4">Category</h4>
                                 <div className="space-y-3">
-                                    {carTypes.map((type) => (
-                                        <div key={type} className="flex items-center space-x-3">
-                                            <Checkbox id={type} className="rounded" />
+                                    {categories.map((category) => (
+                                        <div key={category.id} className="flex items-center space-x-3">
+                                            <Checkbox
+                                                id={`cat-${category.id}`}
+                                                checked={selectedCategories.includes(category.id)}
+                                                onCheckedChange={() => toggleCategory(category.id)}
+                                                className="rounded"
+                                            />
                                             <Label
-                                                htmlFor={type}
+                                                htmlFor={`cat-${category.id}`}
                                                 className="text-sm text-muted-foreground hover:text-foreground cursor-pointer"
                                             >
-                                                {type}
+                                                {category.name}
                                             </Label>
                                         </div>
                                     ))}
@@ -225,7 +266,10 @@ export default function CarsIndex() {
 
                             <Button
                                 className="w-full h-12 rounded-xl bg-secondary text-secondary-foreground lg:hidden"
-                                onClick={() => setShowFilters(false)}
+                                onClick={() => {
+                                    applyFilters();
+                                    setShowFilters(false);
+                                }}
                             >
                                 Apply Filters
                             </Button>
@@ -235,7 +279,7 @@ export default function CarsIndex() {
                         <div className="flex-1">
                             <div className="flex items-center justify-between mb-6">
                                 <p className="text-muted-foreground">
-                                    Showing <span className="text-foreground font-semibold">{cars.length}</span> vehicles
+                                    Showing <span className="text-foreground font-semibold">{pagination.from || 0}-{pagination.to || 0}</span> of <span className="text-foreground font-semibold">{pagination.total}</span> vehicles
                                 </p>
                             </div>
 
@@ -245,10 +289,9 @@ export default function CarsIndex() {
                                         key={car.id}
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: index * 0.1 }}
+                                        transition={{ delay: index * 0.05 }}
                                     >
                                         <Card className="group overflow-hidden rounded-2xl border-border hover:shadow-xl hover:shadow-secondary/5 transition-all duration-300">
-                                            {/* Image */}
                                             <Link href={`/cars/${car.id}`}>
                                                 <div className="relative aspect-[4/3] overflow-hidden cursor-pointer">
                                                     <img
@@ -264,7 +307,6 @@ export default function CarsIndex() {
                                                 </div>
                                             </Link>
 
-                                            {/* Content */}
                                             <div className="p-5">
                                                 <div className="mb-3">
                                                     <p className="text-xs font-medium text-secondary uppercase tracking-wider mb-1">
@@ -277,7 +319,6 @@ export default function CarsIndex() {
                                                     </Link>
                                                 </div>
 
-                                                {/* Specs */}
                                                 <div className="flex items-center gap-4 py-4 border-y border-border">
                                                     <div className="flex items-center gap-1.5 text-muted-foreground">
                                                         <Users className="w-4 h-4" />
@@ -293,7 +334,6 @@ export default function CarsIndex() {
                                                     </div>
                                                 </div>
 
-                                                {/* Price & Actions */}
                                                 <div className="flex items-center justify-between pt-4">
                                                     <div>
                                                         <p className="text-2xl font-bold text-foreground">
@@ -308,7 +348,6 @@ export default function CarsIndex() {
                                                     </Link>
                                                 </div>
 
-                                                {/* Contact Buttons */}
                                                 <div className="grid grid-cols-2 gap-3 mt-4">
                                                     <Button
                                                         variant="outline"
@@ -329,23 +368,53 @@ export default function CarsIndex() {
                             </div>
 
                             {/* Pagination */}
-                            <div className="flex justify-center items-center gap-2 mt-12">
-                                <Button variant="outline" className="rounded-lg" disabled>
-                                    Previous
-                                </Button>
-                                <Button variant="outline" className="w-10 h-10 rounded-lg bg-secondary text-secondary-foreground border-0">
-                                    1
-                                </Button>
-                                <Button variant="outline" className="w-10 h-10 rounded-lg">
-                                    2
-                                </Button>
-                                <Button variant="outline" className="w-10 h-10 rounded-lg">
-                                    3
-                                </Button>
-                                <Button variant="outline" className="rounded-lg">
-                                    Next
-                                </Button>
-                            </div>
+                            {pagination.last_page > 1 && (
+                                <div className="flex justify-center items-center gap-2 mt-12">
+                                    <Button
+                                        variant="outline"
+                                        className="rounded-lg"
+                                        disabled={pagination.current_page === 1}
+                                        onClick={() => goToPage(pagination.current_page - 1)}
+                                    >
+                                        <ChevronLeft className="w-4 h-4 mr-2" />
+                                        Previous
+                                    </Button>
+
+                                    {Array.from({ length: pagination.last_page }, (_, i) => i + 1)
+                                        .filter(page => {
+                                            const current = pagination.current_page;
+                                            return page === 1 || page === pagination.last_page || (page >= current - 1 && page <= current + 1);
+                                        })
+                                        .map((page, idx, arr) => {
+                                            const prevPage = arr[idx - 1];
+                                            return (
+                                                <>
+                                                    {prevPage && page - prevPage > 1 && (
+                                                        <span key={`ellipsis-${page}`} className="px-2 text-muted-foreground">...</span>
+                                                    )}
+                                                    <Button
+                                                        key={page}
+                                                        variant={pagination.current_page === page ? "default" : "outline"}
+                                                        className={`w-10 h-10 rounded-lg ${pagination.current_page === page ? "bg-secondary text-secondary-foreground" : ""}`}
+                                                        onClick={() => goToPage(page)}
+                                                    >
+                                                        {page}
+                                                    </Button>
+                                                </>
+                                            );
+                                        })}
+
+                                    <Button
+                                        variant="outline"
+                                        className="rounded-lg"
+                                        disabled={pagination.current_page === pagination.last_page}
+                                        onClick={() => goToPage(pagination.current_page + 1)}
+                                    >
+                                        Next
+                                        <ChevronRight className="w-4 h-4 ml-2" />
+                                    </Button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

@@ -23,15 +23,20 @@ class ContactController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'phone' => 'nullable|string|max:50',
-            'subject' => 'required|string|max:255',
-            'message' => 'required|string|max:5000',
+            'email' => 'required|email',
+            'phone' => 'nullable|string',
+            'subject' => 'nullable|string|max:255',
+            'message' => 'required|string',
         ]);
 
-        // TODO: Send email or store in database
-        // Mail::to(config('mail.from.address'))->send(new ContactFormMail($validated));
+        // Send email notification to admin
+        try {
+            \Mail::to(config('mail.contact_email', env('CONTACT_EMAIL')))
+                ->send(new \App\Mail\ContactFormMail($validated));
+        } catch (\Exception $e) {
+            \Log::error('Failed to send contact form email: ' . $e->getMessage());
+        }
 
-        return back()->with('success', 'Thank you for your message. We will get back to you soon!');
+        return back()->with('success', 'Thank you for contacting us! We will get back to you soon.');
     }
 }

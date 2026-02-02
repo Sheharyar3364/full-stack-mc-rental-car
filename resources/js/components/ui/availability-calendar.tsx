@@ -42,14 +42,21 @@ const getPriceColor = (multiplier: number): string => {
     return "bg-red-500";
 };
 
+interface BookedDateRange {
+    start: string;
+    end: string;
+}
+
 interface AvailabilityCalendarProps {
     basePrice?: number;
+    bookedDates?: BookedDateRange[];
     onDateSelect?: (date: Date) => void;
     className?: string;
 }
 
 export function AvailabilityCalendar({
     basePrice = 500,
+    bookedDates = [],
     onDateSelect,
     className,
 }: AvailabilityCalendarProps) {
@@ -78,10 +85,18 @@ export function AvailabilityCalendar({
 
     const handleDateClick = (day: number) => {
         const date = new Date(year, month, day);
-        if (date < new Date()) return; // Can't select past dates
+        if (date < new Date() || isDateBooked(date)) return; // Can't select past or booked dates
         playClick();
         setSelectedDate(date);
         onDateSelect?.(date);
+    };
+
+    // Check if a date falls within any booked range
+    const isDateBooked = (date: Date): boolean => {
+        const checkDate = date.toISOString().split('T')[0];
+        return bookedDates.some(range => {
+            return checkDate >= range.start && checkDate <= range.end;
+        });
     };
 
     const findBestDeal = () => {
@@ -179,36 +194,46 @@ export function AvailabilityCalendar({
                         const day = i + 1;
                         const date = new Date(year, month, day);
                         const isPast = date < new Date(today.getFullYear(), today.getMonth(), today.getDate());
+                        const isBooked = !isPast && isDateBooked(date);
                         const isSelected = selectedDate?.toDateString() === date.toDateString();
                         const isToday = date.toDateString() === today.toDateString();
                         const multiplier = getPriceMultiplier(date);
                         const price = Math.round(basePrice * multiplier);
+                        const isDisabled = isPast || isBooked;
 
                         return (
                             <motion.button
                                 key={day}
-                                onClick={() => !isPast && handleDateClick(day)}
-                                disabled={isPast}
+                                onClick={() => !isDisabled && handleDateClick(day)}
+                                disabled={isDisabled}
                                 className={`relative h-16 rounded-xl flex flex-col items-center justify-center transition-all ${isPast
                                     ? "opacity-30 cursor-not-allowed"
-                                    : isSelected
-                                        ? "bg-secondary text-white shadow-lg shadow-secondary/30"
-                                        : "hover:bg-muted"
+                                    : isBooked
+                                        ? "bg-red-500/20 cursor-not-allowed"
+                                        : isSelected
+                                            ? "bg-secondary text-white shadow-lg shadow-secondary/30"
+                                            : "hover:bg-muted"
                                     } ${isToday && !isSelected ? "ring-2 ring-secondary" : ""}`}
-                                whileHover={!isPast ? { scale: 1.05 } : {}}
-                                whileTap={!isPast ? { scale: 0.95 } : {}}
+                                whileHover={!isDisabled ? { scale: 1.05 } : {}}
+                                whileTap={!isDisabled ? { scale: 0.95 } : {}}
                             >
-                                <span className={`text-sm font-bold ${isSelected ? "text-white" : ""}`}>
+                                <span className={`text-sm font-bold ${isSelected ? "text-white" : isBooked ? "text-red-400 line-through" : ""}`}>
                                     {day}
                                 </span>
                                 {!isPast && (
                                     <div className="flex items-center gap-1 mt-1">
-                                        <div className={`w-2 h-2 rounded-full ${getPriceColor(multiplier)}`} />
-                                        <span
-                                            className={`text-[10px] font-medium ${isSelected ? "text-white/80" : "text-muted-foreground"}`}
-                                        >
-                                            €{price}
-                                        </span>
+                                        {isBooked ? (
+                                            <span className="text-[10px] font-medium text-red-400">Booked</span>
+                                        ) : (
+                                            <>
+                                                <div className={`w-2 h-2 rounded-full ${getPriceColor(multiplier)}`} />
+                                                <span
+                                                    className={`text-[10px] font-medium ${isSelected ? "text-white/80" : "text-muted-foreground"}`}
+                                                >
+                                                    €{price}
+                                                </span>
+                                            </>
+                                        )}
                                     </div>
                                 )}
                             </motion.button>

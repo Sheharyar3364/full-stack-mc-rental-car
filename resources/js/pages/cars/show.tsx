@@ -21,55 +21,53 @@ import {
 } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 
-// Mock data
-const carImages = [
-    "https://images.unsplash.com/photo-1555215695-3004980ad54e?w=1600",
-    "https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=1600",
-    "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1600",
-    "https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=1600",
-];
-
-const car = {
-    id: 1,
-    name: "BMW 7 Series",
-    brand: "BMW",
-    type: "Executive Sedan",
-    year: 2023,
-    price: 4500,
-    seats: 5,
-    fuel: "Petrol",
-    transmission: "Automatic",
-    engine: "3.0L Twin Turbo",
-    power: "530 HP",
-    topSpeed: "250 km/h",
-    acceleration: "4.1s",
-    image: carImages[0],
-    description:
-        "Designed for those who arrive before they're announced. Rear-seat comfort rivaling private jets, with technology that anticipates every move.",
-    features: [
-        "Leather Interior",
-        "Panoramic Sunroof",
-        "Massage Seats",
-        "360° Camera",
-        "Adaptive Cruise Control",
-        "Night Vision",
-        "Premium Sound System",
-        "Wireless Charging",
-    ],
-};
-
-interface Props {
-    car?: typeof car;
+interface CarData {
+    id: number;
+    name: string;
+    brand: string;
+    type: string;
+    year: number;
+    price: number;
+    seats: number;
+    fuel: string;
+    transmission: string;
+    image: string;
+    description?: string;
+    engine?: string;
+    power?: string;
+    topSpeed?: string;
+    acceleration?: string;
+    features?: string[];
+    images?: string[];
 }
 
-export default function CarShow({ car: carProp }: Props) {
-    const displayCar = carProp || car;
+interface BookedDateRange {
+    start: string;
+    end: string;
+}
+
+interface CarShowProps {
+    car: CarData;
+    relatedCars?: CarData[];
+    bookedDates?: BookedDateRange[];
+}
+
+export default function CarShow({ car, relatedCars, bookedDates = [] }: CarShowProps) {
     const [currentImage, setCurrentImage] = useState(0);
     const [wishlisted, setWishlisted] = useState(false);
 
+    // Use car images or fallback to default
+    const displayImages = car.images && car.images.length > 0
+        ? car.images
+        : [
+            car.image,
+            "https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=1600",
+            "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1600",
+        ];
+
     return (
         <Layout>
-            <Head title={`${displayCar.name} - MC Rental Cars`} />
+            <Head title={`${car.name} - MC Rental Cars`} />
             <div className="bg-background min-h-screen text-foreground">
                 {/* Hero Section with Gallery */}
                 <div className="relative bg-black">
@@ -84,7 +82,7 @@ export default function CarShow({ car: carProp }: Props) {
                                 Fleet
                             </Link>
                             <span>/</span>
-                            <span className="text-white font-bold">{displayCar.name}</span>
+                            <span className="text-white font-bold">{car.name}</span>
                         </nav>
 
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
@@ -93,7 +91,7 @@ export default function CarShow({ car: carProp }: Props) {
                                 <FadeUpReveal>
                                     <div className="flex items-center gap-3 mb-4">
                                         <span className="px-3 py-1 rounded-full bg-secondary/20 text-secondary text-xs font-bold uppercase tracking-widest">
-                                            {displayCar.type}
+                                            {car.type}
                                         </span>
                                         <span className="px-3 py-1 rounded-full bg-green-500/20 text-green-400 text-xs font-bold uppercase tracking-widest">
                                             Available Now
@@ -103,17 +101,17 @@ export default function CarShow({ car: carProp }: Props) {
 
                                 <div>
                                     <p className="text-secondary text-sm font-black uppercase tracking-[0.3em] mb-2">
-                                        {displayCar.brand}
+                                        {car.brand}
                                     </p>
                                     <h1 className="text-5xl md:text-7xl font-black uppercase text-white leading-[0.9] tracking-tight">
-                                        <TextReveal delay={0.1}>{displayCar.name}</TextReveal>
+                                        <TextReveal delay={0.1}>{car.name}</TextReveal>
                                     </h1>
-                                    <p className="text-white/40 text-2xl font-light mt-2">{displayCar.year}</p>
+                                    <p className="text-white/40 text-2xl font-light mt-2">{car.year}</p>
                                 </div>
 
                                 <FadeUpReveal delay={0.3}>
                                     <p className="text-white/60 text-lg leading-relaxed italic max-w-md">
-                                        "{displayCar.description}"
+                                        "{car.description || `Experience the ultimate in luxury and performance with the ${car.name}.`}"
                                     </p>
                                 </FadeUpReveal>
 
@@ -122,17 +120,17 @@ export default function CarShow({ car: carProp }: Props) {
                                     <div className="grid grid-cols-3 gap-4">
                                         <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-4 text-center">
                                             <Users className="w-6 h-6 text-secondary mx-auto mb-2" />
-                                            <p className="text-white font-bold">{displayCar.seats}</p>
+                                            <p className="text-white font-bold">{car.seats}</p>
                                             <p className="text-white/40 text-xs uppercase tracking-widest">Seats</p>
                                         </div>
                                         <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-4 text-center">
                                             <Settings className="w-6 h-6 text-secondary mx-auto mb-2" />
-                                            <p className="text-white font-bold">{displayCar.transmission}</p>
+                                            <p className="text-white font-bold">{car.transmission}</p>
                                             <p className="text-white/40 text-xs uppercase tracking-widest">Gearbox</p>
                                         </div>
                                         <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-4 text-center">
                                             <Fuel className="w-6 h-6 text-secondary mx-auto mb-2" />
-                                            <p className="text-white font-bold">{displayCar.fuel}</p>
+                                            <p className="text-white font-bold">{car.fuel}</p>
                                             <p className="text-white/40 text-xs uppercase tracking-widest">Fuel</p>
                                         </div>
                                     </div>
@@ -144,13 +142,13 @@ export default function CarShow({ car: carProp }: Props) {
                                         <div>
                                             <p className="text-white/40 text-sm uppercase tracking-widest">From</p>
                                             <p className="text-4xl font-black text-white">
-                                                €{displayCar.price.toLocaleString()}
+                                                €{car.price.toLocaleString()}
                                                 <span className="text-lg font-normal text-white/40">/day</span>
                                             </p>
                                         </div>
 
                                         <div className="flex gap-3">
-                                            <Link href={`/payment/${displayCar.id}`}>
+                                            <Link href={`/booking/create?car_id=${car.id}`}>
                                                 <MagneticButton className="h-14 px-8 bg-secondary text-white font-bold uppercase tracking-widest rounded-xl">
                                                     <Sparkles className="w-4 h-4 mr-2" />
                                                     Book Now
@@ -172,7 +170,7 @@ export default function CarShow({ car: carProp }: Props) {
                                 {/* Compare */}
                                 <FadeUpReveal delay={0.6}>
                                     <div className="flex items-center gap-4 pt-4 border-t border-white/10">
-                                        <CompareButton car={displayCar} />
+                                        <CompareButton car={car} />
                                     </div>
                                 </FadeUpReveal>
                             </div>
@@ -182,14 +180,14 @@ export default function CarShow({ car: carProp }: Props) {
                                 <div className="space-y-4">
                                     <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-card">
                                         <img
-                                            src={carImages[currentImage]}
-                                            alt={displayCar.name}
+                                            src={displayImages[currentImage]}
+                                            alt={car.name}
                                             className="w-full h-full object-cover"
                                         />
                                         <div className="absolute bottom-4 left-4 right-4 flex justify-between">
                                             <button
                                                 onClick={() =>
-                                                    setCurrentImage((p) => (p === 0 ? carImages.length - 1 : p - 1))
+                                                    setCurrentImage((p) => (p === 0 ? displayImages.length - 1 : p - 1))
                                                 }
                                                 className="w-10 h-10 rounded-full bg-black/50 text-white flex items-center justify-center"
                                             >
@@ -197,7 +195,7 @@ export default function CarShow({ car: carProp }: Props) {
                                             </button>
                                             <button
                                                 onClick={() =>
-                                                    setCurrentImage((p) => (p + 1) % carImages.length)
+                                                    setCurrentImage((p) => (p + 1) % displayImages.length)
                                                 }
                                                 className="w-10 h-10 rounded-full bg-black/50 text-white flex items-center justify-center"
                                             >
@@ -206,7 +204,7 @@ export default function CarShow({ car: carProp }: Props) {
                                         </div>
                                     </div>
                                     <div className="grid grid-cols-4 gap-2">
-                                        {carImages.map((img, i) => (
+                                        {displayImages.map((img, i) => (
                                             <button
                                                 key={i}
                                                 onClick={() => setCurrentImage(i)}
@@ -247,10 +245,10 @@ export default function CarShow({ car: carProp }: Props) {
 
                                 <TabsContent value="specs" className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-8">
                                     {[
-                                        { label: "Engine", value: displayCar.engine },
-                                        { label: "Power", value: displayCar.power },
-                                        { label: "Top Speed", value: displayCar.topSpeed },
-                                        { label: "0-100 km/h", value: displayCar.acceleration },
+                                        { label: "Engine", value: car.engine || "3.0L" },
+                                        { label: "Power", value: car.power || "350 HP" },
+                                        { label: "Top Speed", value: car.topSpeed || "250 km/h" },
+                                        { label: "0-100 km/h", value: car.acceleration || "5.0s" },
                                     ].map((spec, i) => (
                                         <div key={i}>
                                             <p className="text-secondary text-[10px] font-black uppercase tracking-widest mb-1">
@@ -262,7 +260,7 @@ export default function CarShow({ car: carProp }: Props) {
                                 </TabsContent>
 
                                 <TabsContent value="features" className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
-                                    {displayCar.features.map((f, i) => (
+                                    {(car.features || ['Leather Interior', 'GPS Navigation', 'Premium Sound']).map((f, i) => (
                                         <div key={i} className="flex items-center gap-3">
                                             <Check className="w-4 h-4 text-secondary" />
                                             <span className="text-sm">{f}</span>
@@ -286,7 +284,7 @@ export default function CarShow({ car: carProp }: Props) {
 
                         {/* Sidebar: Calendar & Contact */}
                         <div className="space-y-6">
-                            <AvailabilityCalendar basePrice={displayCar.price} className="sticky top-24" />
+                            <AvailabilityCalendar basePrice={car.price} bookedDates={bookedDates} className="sticky top-24" />
 
                             <div className="grid grid-cols-2 gap-3">
                                 <Button variant="outline" className="h-14 uppercase text-xs font-black">

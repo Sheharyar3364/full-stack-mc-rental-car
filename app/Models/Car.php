@@ -30,6 +30,9 @@ class Car extends Model
         'daily_rate',
         'status',
         'image',
+        'images',
+        'featured_image',
+        'is_featured',
         'is_active',
     ];
 
@@ -46,6 +49,8 @@ class Car extends Model
             'fuel_type' => FuelType::class,
             'transmission' => Transmission::class,
             'status' => CarStatus::class,
+            'images' => 'array',
+            'is_featured' => 'boolean',
             'is_active' => 'boolean',
         ];
     }

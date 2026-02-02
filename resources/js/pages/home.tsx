@@ -26,41 +26,23 @@ import {
     Headphones,
 } from "lucide-react";
 
-const featuredCars = [
-    {
-        id: 1,
-        name: "BMW 7 Series",
-        brand: "BMW",
-        type: "Sedan",
-        image: "https://images.unsplash.com/photo-1555215695-3004980ad54e?w=800",
-        price: 4500,
-        seats: 5,
-        fuel: "Petrol",
-        transmission: "Automatic",
-    },
-    {
-        id: 2,
-        name: "Mercedes S-Class",
-        brand: "Mercedes",
-        type: "Luxury",
-        image: "https://images.unsplash.com/photo-1617531653332-bd46c24f2068?w=800",
-        price: 5000,
-        seats: 5,
-        fuel: "Petrol",
-        transmission: "Automatic",
-    },
-    {
-        id: 3,
-        name: "Porsche 911",
-        brand: "Porsche",
-        type: "Sports",
-        image: "https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=800",
-        price: 5500,
-        seats: 2,
-        fuel: "Petrol",
-        transmission: "Automatic",
-    },
-];
+import { FaWhatsapp } from "react-icons/fa";
+
+interface Car {
+    id: number;
+    name: string;
+    brand: string;
+    type: string;
+    image: string;
+    price: number;
+    seats: number;
+    fuel: string;
+    transmission: string;
+}
+
+interface HomeProps {
+    featuredCars: Car[];
+}
 
 const experiences = [
     {
@@ -137,7 +119,7 @@ const trustSignals = [
     },
 ];
 
-export default function Home() {
+export default function Home({ featuredCars }: HomeProps) {
     return (
         <Layout>
             <Head title="MC Rental Cars - Premium Car Rentals" />

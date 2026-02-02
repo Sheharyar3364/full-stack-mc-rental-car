@@ -17,6 +17,7 @@ class Booking extends Model
         'booking_number',
         'customer_id',
         'car_id',
+        'user_id',
         'pickup_location_id',
         'dropoff_location_id',
         'pickup_date',
@@ -30,6 +31,8 @@ class Booking extends Model
         'total_amount',
         'deposit_amount',
         'status',
+        'payment_token',
+        'payment_reminder_sent_at',
         'notes',
     ];
 
@@ -50,6 +53,7 @@ class Booking extends Model
             'total_amount' => 'decimal:2',
             'deposit_amount' => 'decimal:2',
             'status' => BookingStatus::class,
+            'payment_reminder_sent_at' => 'datetime',
         ];
     }
 
@@ -63,6 +67,9 @@ class Booking extends Model
         static::creating(function ($booking) {
             if (empty($booking->booking_number)) {
                 $booking->booking_number = self::generateBookingNumber();
+            }
+            if (empty($booking->payment_token)) {
+                $booking->payment_token = (string) \Illuminate\Support\Str::uuid();
             }
         });
     }
@@ -88,6 +95,14 @@ class Booking extends Model
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    /**
+     * The authenticated user who made this booking (optional).
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     /**
@@ -138,5 +153,21 @@ class Booking extends Model
     public function getBalanceDueAttribute(): float
     {
         return $this->total_amount - $this->total_paid;
+    }
+
+    /**
+     * Get the balance payment URL using the unique token.
+     */
+    public function getBalancePaymentUrlAttribute(): string
+    {
+        return url('/payment/balance/' . $this->payment_token);
+    }
+
+    /**
+     * Check if there's a balance remaining.
+     */
+    public function hasBalanceDue(): bool
+    {
+        return $this->balance_due > 0;
     }
 }

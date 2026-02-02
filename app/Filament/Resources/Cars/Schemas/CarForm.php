@@ -98,15 +98,39 @@ class CarForm
                             ->helperText('Inactive cars are hidden from availability'),
                     ]),
 
-                Section::make('Image')
+                Section::make('Images')
                     ->schema([
-                        FileUpload::make('image')
+                        FileUpload::make('images')
+                            ->label('Car Images (Multiple)')
                             ->image()
+                            ->multiple()
+                            ->reorderable()
+                            ->maxFiles(10)
                             ->directory('cars')
                             ->imageResizeMode('cover')
                             ->imageCropAspectRatio('16:9')
                             ->imageResizeTargetWidth('1920')
-                            ->imageResizeTargetHeight('1080'),
+                            ->imageResizeTargetHeight('1080')
+                            ->helperText('Upload up to 10 images. First image will be the main image.')
+                            ->columnSpanFull(),
+                        FileUpload::make('featured_image')
+                            ->label('Featured Image (Homepage)')
+                            ->image()
+                            ->directory('cars/featured')
+                            ->imageResizeMode('cover')
+                            ->imageCropAspectRatio('16:9')
+                            ->imageResizeTargetWidth('1920')
+                            ->imageResizeTargetHeight('1080')
+                            ->helperText('Special image for homepage featured section')
+                            ->columnSpanFull(),
+                    ]),
+
+                Section::make('Featured Settings')
+                    ->schema([
+                        Toggle::make('is_featured')
+                            ->label('Show on Homepage')
+                            ->helperText('Feature this car on the homepage')
+                            ->default(false),
                     ]),
             ]);
     }

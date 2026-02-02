@@ -139,6 +139,28 @@ class BookingsTable
                         $record->update(['status' => BookingStatus::Cancelled]);
                         Notification::make()->title('Booking cancelled')->danger()->send();
                     }),
+                Action::make('send_payment_reminder')
+                    ->label('Send Payment Reminder')
+                    ->icon('heroicon-o-envelope')
+                    ->color('warning')
+                    ->requiresConfirmation()
+                    ->modalHeading('Send Payment Reminder')
+                    ->modalDescription(fn ($record) => "Send payment reminder email to {$record->customer->email}? Balance due: $" . number_format($record->balance_due, 2))
+                    ->visible(fn ($record) => $record->balance_due > 0)
+                    ->action(function ($record) {
+                        // Send the email
+                        \Illuminate\Support\Facades\Mail::to($record->customer->email)
+                            ->send(new \App\Mail\BalancePaymentReminder($record));
+                        
+                        // Update reminder sent timestamp
+                        $record->update(['payment_reminder_sent_at' => now()]);
+                        
+                        Notification::make()
+                            ->title('Payment reminder sent')
+                            ->body("Email sent to {$record->customer->email}")
+                            ->success()
+                            ->send();
+                    }),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
