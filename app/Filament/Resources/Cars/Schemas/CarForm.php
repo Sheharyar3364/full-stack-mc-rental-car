@@ -92,7 +92,7 @@ class CarForm
                     ->schema([
                         TextInput::make('daily_rate')
                             ->numeric()
-                            ->prefix('$')
+                            ->prefix('€')
                             ->helperText('Leave blank to use category rate'),
                         Select::make('status')
                             ->options(CarStatus::class)

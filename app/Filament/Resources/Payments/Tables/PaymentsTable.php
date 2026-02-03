@@ -17,7 +17,7 @@ class PaymentsTable
                 TextColumn::make('booking.id')
                     ->searchable(),
                 TextColumn::make('amount')
-                    ->numeric()
+                    ->money('EUR')
                     ->sortable(),
                 TextColumn::make('payment_method')
                     ->badge()

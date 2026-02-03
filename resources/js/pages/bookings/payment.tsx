@@ -109,11 +109,11 @@ export default function Payment({ booking, stripePublicKey, stripeSessionId, str
                                 </div>
                                 <div className="flex justify-between text-sm">
                                     <span className="text-muted-foreground">Total Amount</span>
-                                    <span className="font-medium">${booking.total_amount.toLocaleString()}</span>
+                                    <span className="font-medium">€{booking.total_amount.toLocaleString()}</span>
                                 </div>
                                 <div className="flex justify-between text-sm font-bold">
                                     <span>Deposit Due Now</span>
-                                    <span className="text-secondary">${booking.deposit_amount.toLocaleString()}</span>
+                                    <span className="text-secondary">€{booking.deposit_amount.toLocaleString()}</span>
                                 </div>
                             </div>
                         </div>

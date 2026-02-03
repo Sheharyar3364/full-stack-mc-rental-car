@@ -20,7 +20,7 @@ class CarCategoriesTable
                 TextColumn::make('slug')
                     ->searchable(),
                 TextColumn::make('daily_rate')
-                    ->numeric()
+                    ->money('EUR')
                     ->sortable(),
                 IconColumn::make('is_active')
                     ->boolean(),

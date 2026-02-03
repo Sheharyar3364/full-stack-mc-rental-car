@@ -199,13 +199,16 @@ class CarController extends Controller
         if (empty($imagePath) && !empty($car->images)) {
             $imagePath = is_array($car->images) ? $car->images[0] : null;
         }
+        if (empty($imagePath)) {
+            $imagePath = $car->featured_image;
+        }
 
         if (empty($imagePath)) {
             $image = 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=800';
         } elseif (str_starts_with($imagePath, 'http')) {
             $image = $imagePath;
         } else {
-            $image = asset('storage/' . $imagePath);
+            $image = asset('storage/' . ltrim($imagePath, '/'));
         }
 
         $data = [

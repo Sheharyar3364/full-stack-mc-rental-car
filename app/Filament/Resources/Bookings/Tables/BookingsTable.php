@@ -48,7 +48,7 @@ class BookingsTable
                     ->numeric()
                     ->alignCenter(),
                 TextColumn::make('total_amount')
-                    ->money('USD')
+                    ->money('EUR')
                     ->sortable()
                     ->label('Total'),
                 TextColumn::make('status')
@@ -145,7 +145,7 @@ class BookingsTable
                     ->color('warning')
                     ->requiresConfirmation()
                     ->modalHeading('Send Payment Reminder')
-                    ->modalDescription(fn ($record) => "Send payment reminder email to {$record->customer->email}? Balance due: $" . number_format($record->balance_due, 2))
+                    ->modalDescription(fn ($record) => "Send payment reminder email to {$record->customer->email}? Balance due: €" . number_format($record->balance_due, 2))
                     ->visible(fn ($record) => $record->balance_due > 0)
                     ->action(function ($record) {
                         // Send the email

@@ -24,7 +24,7 @@ class PaymentsRelationManager extends RelationManager
                 TextInput::make('amount')
                     ->required()
                     ->numeric()
-                    ->prefix('$'),
+                    ->prefix('€'),
                 Select::make('payment_method')
                     ->options(PaymentMethod::class)
                     ->required(),
@@ -47,7 +47,7 @@ class PaymentsRelationManager extends RelationManager
             ->recordTitleAttribute('amount')
             ->columns([
                 Tables\Columns\TextColumn::make('amount')
-                    ->money('USD'),
+                    ->money('EUR'),
                 Tables\Columns\TextColumn::make('method')
                     ->badge(),
                 Tables\Columns\TextColumn::make('type')

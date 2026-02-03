@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     ChevronLeft,
@@ -52,6 +52,10 @@ interface AvailabilityCalendarProps {
     bookedDates?: BookedDateRange[];
     onDateSelect?: (date: Date) => void;
     className?: string;
+    compact?: boolean;
+    value?: Date | null;
+    showHeader?: boolean;
+    minDate?: Date | null;
 }
 
 export function AvailabilityCalendar({
@@ -59,14 +63,29 @@ export function AvailabilityCalendar({
     bookedDates = [],
     onDateSelect,
     className,
+    compact = false,
+    value = null,
+    showHeader = true,
+    minDate = null,
 }: AvailabilityCalendarProps) {
-    const [currentDate, setCurrentDate] = useState(new Date());
-    const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+    const [viewDate, setViewDate] = useState(value || new Date());
+    const [selectedDateState, setSelectedDateState] = useState<Date | null>(value);
+
+    // Use controlled value if provided, otherwise internal state
+    const selectedDate = value !== undefined ? value : selectedDateState;
+
+    // Sync view date with value if value changes from outside
+    useEffect(() => {
+        if (value) {
+            setViewDate(value);
+        }
+    }, [value]);
+
     const [showBestDeal, setShowBestDeal] = useState(false);
     const { playClick } = useSoundEffects();
 
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth();
+    const year = viewDate.getFullYear();
+    const month = viewDate.getMonth();
 
     const firstDayOfMonth = new Date(year, month, 1);
     const lastDayOfMonth = new Date(year, month + 1, 0);
@@ -75,19 +94,22 @@ export function AvailabilityCalendar({
 
     const prevMonth = () => {
         playClick();
-        setCurrentDate(new Date(year, month - 1, 1));
+        setViewDate(new Date(year, month - 1, 1));
     };
 
     const nextMonth = () => {
         playClick();
-        setCurrentDate(new Date(year, month + 1, 1));
+        setViewDate(new Date(year, month + 1, 1));
     };
 
     const handleDateClick = (day: number) => {
         const date = new Date(year, month, day);
-        if (date < new Date() || isDateBooked(date)) return; // Can't select past or booked dates
+        const isBeforeMin = minDate ? date < new Date(minDate.getFullYear(), minDate.getMonth(), minDate.getDate()) : false;
+        if (date < new Date(today.getFullYear(), today.getMonth(), today.getDate()) || isDateBooked(date) || isBeforeMin) return;
         playClick();
-        setSelectedDate(date);
+        if (value === undefined) {
+            setSelectedDateState(date);
+        }
         onDateSelect?.(date);
     };
 
@@ -115,8 +137,10 @@ export function AvailabilityCalendar({
             }
         }
 
-        setCurrentDate(new Date(bestDate.getFullYear(), bestDate.getMonth(), 1));
-        setSelectedDate(bestDate);
+        setViewDate(new Date(bestDate.getFullYear(), bestDate.getMonth(), 1));
+        if (value === undefined) {
+            setSelectedDateState(bestDate);
+        }
         setShowBestDeal(true);
         setTimeout(() => setShowBestDeal(false), 3000);
     };
@@ -126,47 +150,51 @@ export function AvailabilityCalendar({
     return (
         <div className={`bg-card border border-border rounded-2xl overflow-hidden ${className}`}>
             {/* Header */}
-            <div className="p-6 border-b border-border">
-                <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center">
-                            <CalendarIcon className="w-5 h-5 text-secondary" />
+            {showHeader && (
+                <div className="p-6 border-b border-border">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                            <div className={`rounded-xl bg-secondary/10 flex items-center justify-center ${compact ? 'w-8 h-8' : 'w-10 h-10'}`}>
+                                <CalendarIcon className={`${compact ? 'w-4 h-4' : 'w-5 h-5'} text-secondary`} />
+                            </div>
+                            <div>
+                                <h3 className={`${compact ? 'text-sm' : 'text-lg'} font-bold`}>{compact ? 'Availability' : 'Availability & Pricing'}</h3>
+                                {!compact && <p className="text-muted-foreground text-sm">Select your rental date</p>}
+                            </div>
                         </div>
-                        <div>
-                            <h3 className="font-bold text-lg">Availability & Pricing</h3>
-                            <p className="text-muted-foreground text-sm">Select your rental date</p>
-                        </div>
+                        {!compact && (
+                            <motion.button
+                                onClick={findBestDeal}
+                                className="flex items-center gap-2 px-4 py-2 rounded-full bg-green-500/10 text-green-600 text-sm font-bold hover:bg-green-500/20 transition-colors"
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                            >
+                                <Sparkles className="w-4 h-4" />
+                                Find Best Deal
+                            </motion.button>
+                        )}
                     </div>
-                    <motion.button
-                        onClick={findBestDeal}
-                        className="flex items-center gap-2 px-4 py-2 rounded-full bg-green-500/10 text-green-600 text-sm font-bold hover:bg-green-500/20 transition-colors"
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                    >
-                        <Sparkles className="w-4 h-4" />
-                        Find Best Deal
-                    </motion.button>
-                </div>
 
-                {/* Month Navigation */}
-                <div className="flex items-center justify-between">
-                    <button
-                        onClick={prevMonth}
-                        className="w-10 h-10 rounded-full hover:bg-muted flex items-center justify-center transition-colors"
-                    >
-                        <ChevronLeft className="w-5 h-5" />
-                    </button>
-                    <h4 className="text-xl font-bold">
-                        {months[month]} {year}
-                    </h4>
-                    <button
-                        onClick={nextMonth}
-                        className="w-10 h-10 rounded-full hover:bg-muted flex items-center justify-center transition-colors"
-                    >
-                        <ChevronRight className="w-5 h-5" />
-                    </button>
+                    {/* Month Navigation */}
+                    <div className="flex items-center justify-between">
+                        <button
+                            onClick={prevMonth}
+                            className={`${compact ? 'w-8 h-8' : 'w-10 h-10'} rounded-full hover:bg-muted flex items-center justify-center transition-colors`}
+                        >
+                            <ChevronLeft className={`${compact ? 'w-4 h-4' : 'w-5 h-5'}`} />
+                        </button>
+                        <h4 className={`${compact ? 'text-lg' : 'text-xl'} font-bold`}>
+                            {months[month]} {year}
+                        </h4>
+                        <button
+                            onClick={nextMonth}
+                            className={`${compact ? 'w-8 h-8' : 'w-10 h-10'} rounded-full hover:bg-muted flex items-center justify-center transition-colors`}
+                        >
+                            <ChevronRight className={`${compact ? 'w-4 h-4' : 'w-5 h-5'}`} />
+                        </button>
+                    </div>
                 </div>
-            </div>
+            )}
 
             {/* Calendar Grid */}
             <div className="p-4">
@@ -199,14 +227,16 @@ export function AvailabilityCalendar({
                         const isToday = date.toDateString() === today.toDateString();
                         const multiplier = getPriceMultiplier(date);
                         const price = Math.round(basePrice * multiplier);
-                        const isDisabled = isPast || isBooked;
+
+                        const isBeforeMin = minDate ? date < new Date(minDate.getFullYear(), minDate.getMonth(), minDate.getDate()) : false;
+                        const isDisabled = isPast || isBooked || isBeforeMin;
 
                         return (
                             <motion.button
                                 key={day}
                                 onClick={() => !isDisabled && handleDateClick(day)}
                                 disabled={isDisabled}
-                                className={`relative h-16 rounded-xl flex flex-col items-center justify-center transition-all ${isPast
+                                className={`relative ${compact ? 'h-10' : 'h-16'} rounded-xl flex flex-col items-center justify-center transition-all ${isPast
                                     ? "opacity-30 cursor-not-allowed"
                                     : isBooked
                                         ? "bg-red-500/20 cursor-not-allowed"
@@ -217,10 +247,10 @@ export function AvailabilityCalendar({
                                 whileHover={!isDisabled ? { scale: 1.05 } : {}}
                                 whileTap={!isDisabled ? { scale: 0.95 } : {}}
                             >
-                                <span className={`text-sm font-bold ${isSelected ? "text-white" : isBooked ? "text-red-400 line-through" : ""}`}>
+                                <span className={`${compact ? 'text-[10px]' : 'text-sm'} font-bold ${isSelected ? "text-white" : isBooked ? "text-red-400 line-through" : ""}`}>
                                     {day}
                                 </span>
-                                {!isPast && (
+                                {!isPast && !compact && (
                                     <div className="flex items-center gap-1 mt-1">
                                         {isBooked ? (
                                             <span className="text-[10px] font-medium text-red-400">Booked</span>
@@ -236,62 +266,69 @@ export function AvailabilityCalendar({
                                         )}
                                     </div>
                                 )}
+                                {!isPast && compact && isBooked && (
+                                    <div className="w-1 h-1 rounded-full bg-red-500 mt-0.5" />
+                                )}
                             </motion.button>
                         );
                     })}
                 </div>
             </div>
 
-            {/* Legend */}
-            <div className="px-6 pb-4">
-                <div className="flex items-center justify-center gap-6 text-xs">
-                    <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-green-500" />
-                        <span className="text-muted-foreground">Best Price</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-yellow-400" />
-                        <span className="text-muted-foreground">Standard</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-red-500" />
-                        <span className="text-muted-foreground">Peak</span>
+            {/* Legend - Hide on compact */}
+            {!compact && (
+                <div className="px-6 pb-4">
+                    <div className="flex items-center justify-center gap-6 text-xs">
+                        <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full bg-green-500" />
+                            <span className="text-muted-foreground">Best Price</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full bg-yellow-400" />
+                            <span className="text-muted-foreground">Standard</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full bg-red-500" />
+                            <span className="text-muted-foreground">Peak</span>
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
 
-            {/* Selected Date Summary */}
-            <AnimatePresence>
-                {selectedDate && (
-                    <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        className="border-t border-border overflow-hidden"
-                    >
-                        <div className="p-6 bg-muted/50">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm text-muted-foreground">Selected Date</p>
-                                    <p className="text-xl font-bold">
-                                        {selectedDate.toLocaleDateString("en-US", {
-                                            weekday: "long",
-                                            month: "long",
-                                            day: "numeric",
-                                        })}
-                                    </p>
-                                </div>
-                                <div className="text-right">
-                                    <p className="text-sm text-muted-foreground">Price per day</p>
-                                    <p className="text-2xl font-black text-secondary">
-                                        €{Math.round(basePrice * getPriceMultiplier(selectedDate))}
-                                    </p>
+            {/* Selected Date Summary - Hide on compact */}
+            {!compact && (
+                <AnimatePresence>
+                    {selectedDate && (
+                        <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            className="border-t border-border overflow-hidden"
+                        >
+                            <div className="p-6 bg-muted/50">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-muted-foreground">Selected Date</p>
+                                        <p className="text-xl font-bold">
+                                            {selectedDate.toLocaleDateString("en-US", {
+                                                weekday: "long",
+                                                month: "long",
+                                                day: "numeric",
+                                            })}
+                                        </p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-sm text-muted-foreground">Price per day</p>
+                                        <p className="text-2xl font-black text-secondary">
+                                            €{Math.round(basePrice * getPriceMultiplier(selectedDate))}
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            )}
 
             {/* Best Deal Toast */}
             <AnimatePresence>

@@ -39,7 +39,7 @@ class CarCategoryForm
                         TextInput::make('daily_rate')
                             ->required()
                             ->numeric()
-                            ->prefix('$')
+                            ->prefix('€')
                             ->minValue(0),
                         Toggle::make('is_active')
                             ->label('Active')

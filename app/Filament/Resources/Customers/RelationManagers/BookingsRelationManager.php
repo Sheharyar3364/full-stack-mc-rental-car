@@ -37,7 +37,7 @@ class BookingsRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('dropoff_date')
                     ->date(),
                 Tables\Columns\TextColumn::make('total_amount')
-                    ->money('USD'),
+                    ->money('EUR'),
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
                     ->color(fn (BookingStatus $state): string => $state->getColor()),

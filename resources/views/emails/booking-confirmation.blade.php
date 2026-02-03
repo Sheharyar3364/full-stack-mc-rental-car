@@ -143,25 +143,25 @@
             <div class="car-details">
                 <div class="detail-row">
                     <span class="label">Daily Rate</span>
-                    <span class="value">${{ number_format($booking->daily_rate, 2) }}</span>
+                    <span class="value">€{{ number_format($booking->daily_rate, 2) }}</span>
                 </div>
                 <div class="detail-row">
                     <span class="label">Subtotal ({{ $booking->total_days }} days)</span>
-                    <span class="value">${{ number_format($booking->subtotal, 2) }}</span>
+                    <span class="value">€{{ number_format($booking->subtotal, 2) }}</span>
                 </div>
                 <div class="detail-row">
                     <span class="label">Tax</span>
-                    <span class="value">${{ number_format($booking->tax_amount, 2) }}</span>
+                    <span class="value">€{{ number_format($booking->tax_amount, 2) }}</span>
                 </div>
                 <div class="detail-row">
                     <span class="label">Deposit Paid</span>
-                    <span class="value">${{ number_format($booking->deposit_amount, 2) }}</span>
+                    <span class="value">€{{ number_format($booking->deposit_amount, 2) }}</span>
                 </div>
             </div>
             
             <div class="total-row">
                 <span>Total Amount</span>
-                <span>${{ number_format($booking->total_amount, 2) }}</span>
+                <span>€{{ number_format($booking->total_amount, 2) }}</span>
             </div>
             
             <p style="margin-top: 30px; padding: 20px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">

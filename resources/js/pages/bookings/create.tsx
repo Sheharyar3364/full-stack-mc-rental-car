@@ -8,6 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Calendar, MapPin, User, Mail, Phone, CreditCard, AlertCircle, CheckCircle2, LogIn, UserPlus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
+import { format } from "date-fns";
+import { AvailabilityCalendar } from "@/components/ui/availability-calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface CarData {
     id: number;
@@ -34,14 +37,20 @@ interface AuthData {
     email: string | null;
 }
 
+interface BookedDateRange {
+    start: string;
+    end: string;
+}
+
 interface BookingCreateProps {
     car: CarData;
     locations: LocationData[];
     auth?: AuthData;
     errors?: Record<string, string>;
+    bookedDates?: BookedDateRange[];
 }
 
-export default function BookingCreate({ car, locations, auth }: BookingCreateProps) {
+export default function BookingCreate({ car, locations, auth, bookedDates = [] }: BookingCreateProps) {
     const [isChecking, setIsChecking] = useState(false);
     const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
     const [showAuthChoice, setShowAuthChoice] = useState(!auth?.isAuthenticated);
@@ -52,6 +61,9 @@ export default function BookingCreate({ car, locations, auth }: BookingCreatePro
         tax: 0,
         total: 0,
     });
+
+    const [pickupOpen, setPickupOpen] = useState(false);
+    const [dropoffOpen, setDropoffOpen] = useState(false);
 
     // Parse name for authenticated users
     const nameParts = auth?.name?.split(' ') || [];
@@ -70,6 +82,18 @@ export default function BookingCreate({ car, locations, auth }: BookingCreatePro
         phone: "",
         drivers_license_number: "",
     });
+
+    // Handle auth state changes (e.g. if user logs in via a modal or different tab)
+    useEffect(() => {
+        if (auth?.isAuthenticated) {
+            setData((d) => ({
+                ...d,
+                first_name: defaultFirstName,
+                last_name: defaultLastName,
+                email: auth?.email || d.email,
+            }));
+        }
+    }, [auth]);
 
     // Calculate pricing when dates change
     useEffect(() => {
@@ -219,34 +243,73 @@ export default function BookingCreate({ car, locations, auth }: BookingCreatePro
                                             <h2 className="text-xl font-bold">Rental Period</h2>
                                         </div>
 
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div className="flex flex-col gap-2">
                                                 <Label htmlFor="pickup_date">Pickup Date</Label>
-                                                <Input
-                                                    id="pickup_date"
-                                                    type="date"
-                                                    min={minDate}
-                                                    value={data.pickup_date}
-                                                    onChange={(e) => setData('pickup_date', e.target.value)}
-                                                    className="mt-2"
-                                                    required
-                                                />
+                                                <Popover open={pickupOpen} onOpenChange={setPickupOpen}>
+                                                    <PopoverTrigger asChild>
+                                                        <Button
+                                                            variant="outline"
+                                                            className={`w-full justify-start text-left font-normal h-12 px-4 border-border rounded-xl ${!data.pickup_date && "text-muted-foreground"}`}
+                                                        >
+                                                            <Calendar className="mr-2 h-4 w-4 text-secondary" />
+                                                            {data.pickup_date ? (
+                                                                format(new Date(data.pickup_date), "PPP")
+                                                            ) : (
+                                                                <span>Pick a date</span>
+                                                            )}
+                                                        </Button>
+                                                    </PopoverTrigger>
+                                                    <PopoverContent className="w-auto p-0 border-none bg-transparent shadow-2xl" align="start">
+                                                        <AvailabilityCalendar
+                                                            basePrice={car.price}
+                                                            bookedDates={bookedDates}
+                                                            showHeader={false}
+                                                            compact={true}
+                                                            value={data.pickup_date ? new Date(data.pickup_date) : null}
+                                                            onDateSelect={(date) => {
+                                                                setData('pickup_date', format(date, "yyyy-MM-dd"));
+                                                                setPickupOpen(false);
+                                                            }}
+                                                        />
+                                                    </PopoverContent>
+                                                </Popover>
                                                 {errors.pickup_date && (
                                                     <p className="text-red-500 text-sm mt-1">{errors.pickup_date}</p>
                                                 )}
                                             </div>
 
-                                            <div>
+                                            <div className="flex flex-col gap-2">
                                                 <Label htmlFor="dropoff_date">Dropoff Date</Label>
-                                                <Input
-                                                    id="dropoff_date"
-                                                    type="date"
-                                                    min={data.pickup_date || minDate}
-                                                    value={data.dropoff_date}
-                                                    onChange={(e) => setData('dropoff_date', e.target.value)}
-                                                    className="mt-2"
-                                                    required
-                                                />
+                                                <Popover open={dropoffOpen} onOpenChange={setDropoffOpen}>
+                                                    <PopoverTrigger asChild>
+                                                        <Button
+                                                            variant="outline"
+                                                            className={`w-full justify-start text-left font-normal h-12 px-4 border-border rounded-xl ${!data.dropoff_date && "text-muted-foreground"}`}
+                                                        >
+                                                            <Calendar className="mr-2 h-4 w-4 text-secondary" />
+                                                            {data.dropoff_date ? (
+                                                                format(new Date(data.dropoff_date), "PPP")
+                                                            ) : (
+                                                                <span>Pick a date</span>
+                                                            )}
+                                                        </Button>
+                                                    </PopoverTrigger>
+                                                    <PopoverContent className="w-auto p-0 border-none bg-transparent shadow-2xl" align="start">
+                                                        <AvailabilityCalendar
+                                                            basePrice={car.price}
+                                                            bookedDates={bookedDates}
+                                                            showHeader={false}
+                                                            compact={true}
+                                                            value={data.dropoff_date ? new Date(data.dropoff_date) : null}
+                                                            minDate={data.pickup_date ? new Date(data.pickup_date) : null}
+                                                            onDateSelect={(date) => {
+                                                                setData('dropoff_date', format(date, "yyyy-MM-dd"));
+                                                                setDropoffOpen(false);
+                                                            }}
+                                                        />
+                                                    </PopoverContent>
+                                                </Popover>
                                                 {errors.dropoff_date && (
                                                     <p className="text-red-500 text-sm mt-1">{errors.dropoff_date}</p>
                                                 )}
@@ -435,79 +498,81 @@ export default function BookingCreate({ car, locations, auth }: BookingCreatePro
                             <motion.div
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
-                                className="bg-card border border-border rounded-2xl p-6 sticky top-24"
+                                className="bg-card border border-border rounded-2xl p-6 sticky top-24 space-y-6"
                             >
-                                <h3 className="text-lg font-bold mb-4">Booking Summary</h3>
+                                <div>
+                                    <h3 className="text-lg font-bold mb-4">Booking Summary</h3>
 
-                                {/* Car Image */}
-                                <img
-                                    src={car.image}
-                                    alt={car.name}
-                                    className="w-full h-40 object-cover rounded-xl mb-4"
-                                />
+                                    {/* Car Image */}
+                                    <img
+                                        src={car.image}
+                                        alt={car.name}
+                                        className="w-full h-40 object-cover rounded-xl mb-4"
+                                    />
 
-                                {/* Car Details */}
-                                <div className="mb-6">
-                                    <p className="text-secondary text-xs font-bold uppercase tracking-widest mb-1">
-                                        {car.type}
-                                    </p>
-                                    <h4 className="text-xl font-black">{car.name}</h4>
-                                    <p className="text-muted-foreground text-sm mt-1">
-                                        {car.brand} {car.model} • {car.year}
-                                    </p>
-                                </div>
-
-                                {/* Pricing Breakdown */}
-                                {pricing.days > 0 && (
-                                    <div className="space-y-3 border-t border-border pt-4">
-                                        <div className="flex justify-between text-sm">
-                                            <span className="text-muted-foreground">Daily Rate</span>
-                                            <span className="font-medium">${car.price.toLocaleString()}</span>
-                                        </div>
-                                        <div className="flex justify-between text-sm">
-                                            <span className="text-muted-foreground">Duration</span>
-                                            <span className="font-medium">{pricing.days} days</span>
-                                        </div>
-                                        <div className="flex justify-between text-sm">
-                                            <span className="text-muted-foreground">Subtotal</span>
-                                            <span className="font-medium">${pricing.subtotal.toLocaleString()}</span>
-                                        </div>
-                                        <div className="flex justify-between text-sm">
-                                            <span className="text-muted-foreground">Tax (10%)</span>
-                                            <span className="font-medium">${pricing.tax.toFixed(2)}</span>
-                                        </div>
-                                        <div className="flex justify-between text-lg font-bold border-t border-border pt-3">
-                                            <span>Total</span>
-                                            <span className="text-secondary">${pricing.total.toLocaleString()}</span>
-                                        </div>
-                                        <p className="text-xs text-muted-foreground mt-2">
-                                            Deposit required: ${(pricing.total * 0.3).toFixed(2)} (30%)
+                                    {/* Car Details */}
+                                    <div className="mb-6">
+                                        <p className="text-secondary text-xs font-bold uppercase tracking-widest mb-1">
+                                            {car.type}
+                                        </p>
+                                        <h4 className="text-xl font-black">{car.name}</h4>
+                                        <p className="text-muted-foreground text-sm mt-1">
+                                            {car.brand} {car.model} • {car.year}
                                         </p>
                                     </div>
-                                )}
 
-                                {/* Submit Button */}
-                                <Button
-                                    type="submit"
-                                    disabled={processing || isAvailable === false || !pricing.days || !data.pickup_location_id || !data.dropoff_location_id}
-                                    className="w-full mt-6 h-12 bg-secondary hover:bg-secondary/90 text-white font-bold uppercase tracking-widest"
-                                >
-                                    {processing ? (
-                                        <>
-                                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                                            Processing...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <CreditCard className="w-4 h-4 mr-2" />
-                                            Proceed to Payment
-                                        </>
+                                    {/* Pricing Breakdown */}
+                                    {pricing.days > 0 && (
+                                        <div className="space-y-3 border-t border-border pt-4">
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-muted-foreground">Daily Rate</span>
+                                                <span className="font-medium">€{car.price.toLocaleString()}</span>
+                                            </div>
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-muted-foreground">Duration</span>
+                                                <span className="font-medium">{pricing.days} days</span>
+                                            </div>
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-muted-foreground">Subtotal</span>
+                                                <span className="font-medium">€{pricing.subtotal.toLocaleString()}</span>
+                                            </div>
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-muted-foreground">Tax (10%)</span>
+                                                <span className="font-medium">€{pricing.tax.toFixed(2)}</span>
+                                            </div>
+                                            <div className="flex justify-between text-lg font-bold border-t border-border pt-3">
+                                                <span>Total</span>
+                                                <span className="text-secondary">€{pricing.total.toLocaleString()}</span>
+                                            </div>
+                                            <p className="text-xs text-muted-foreground mt-2">
+                                                Deposit required: €{(pricing.total * 0.3).toFixed(2)} (30%)
+                                            </p>
+                                        </div>
                                     )}
-                                </Button>
 
-                                <p className="text-xs text-center text-muted-foreground mt-4">
-                                    Secure payment powered by Stripe
-                                </p>
+                                    {/* Submit Button */}
+                                    <Button
+                                        type="submit"
+                                        disabled={processing || isAvailable === false || !pricing.days || !data.pickup_location_id || !data.dropoff_location_id}
+                                        className="w-full mt-6 h-12 bg-secondary hover:bg-secondary/90 text-white font-bold uppercase tracking-widest"
+                                    >
+                                        {processing ? (
+                                            <>
+                                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                                                Processing...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <CreditCard className="w-4 h-4 mr-2" />
+                                                Proceed to Payment
+                                            </>
+                                        )}
+                                    </Button>
+
+                                    <p className="text-xs text-center text-muted-foreground mt-4">
+                                        Secure payment powered by Stripe
+                                    </p>
+                                </div>
                             </motion.div>
                         </div>
                     </form>

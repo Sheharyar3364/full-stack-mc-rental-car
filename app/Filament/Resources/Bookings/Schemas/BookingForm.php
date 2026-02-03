@@ -63,7 +63,7 @@ class BookingForm
                                     ->with('category')
                                     ->get()
                                     ->mapWithKeys(fn ($car) => [
-                                        $car->id => "{$car->year} {$car->brand} {$car->model} ({$car->license_plate}) - \${$car->effective_daily_rate}/day",
+                                        $car->id => "{$car->year} {$car->brand} {$car->model} ({$car->license_plate}) - €{$car->effective_daily_rate}/day",
                                     ]);
                             })
                             ->required()
@@ -118,7 +118,7 @@ class BookingForm
                         TextInput::make('daily_rate')
                             ->required()
                             ->numeric()
-                            ->prefix('$')
+                            ->prefix('€')
                             ->live()
                             ->afterStateUpdated(fn (Get $get, Set $set) => self::calculateTotals($get, $set)),
                         TextInput::make('total_days')
@@ -128,23 +128,23 @@ class BookingForm
                         TextInput::make('subtotal')
                             ->required()
                             ->numeric()
-                            ->prefix('$')
+                            ->prefix('€')
                             ->readOnly(),
                         TextInput::make('tax_amount')
                             ->required()
                             ->numeric()
-                            ->prefix('$')
+                            ->prefix('€')
                             ->default(0)
                             ->readOnly(),
                         TextInput::make('total_amount')
                             ->required()
                             ->numeric()
-                            ->prefix('$')
+                            ->prefix('€')
                             ->readOnly(),
                         TextInput::make('deposit_amount')
                             ->required()
                             ->numeric()
-                            ->prefix('$')
+                            ->prefix('€')
                             ->default(200),
                     ]),
 

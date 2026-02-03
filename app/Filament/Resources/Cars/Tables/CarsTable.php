@@ -22,6 +22,10 @@ class CarsTable
         return $table
             ->columns([
                 ImageColumn::make('image')
+                    ->label('Thumbnail')
+                    ->getStateUsing(fn (\App\Models\Car $record): ?string => 
+                        $record->image ?: (!empty($record->images) ? $record->images[0] : $record->featured_image)
+                    )
                     ->circular()
                     ->size(40),
                 TextColumn::make('category.name')
@@ -59,7 +63,7 @@ class CarsTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('daily_rate')
-                    ->money('USD')
+                    ->money('EUR')
                     ->sortable()
                     ->label('Rate/Day'),
                 TextColumn::make('status')

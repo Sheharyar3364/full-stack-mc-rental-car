@@ -235,7 +235,7 @@ export default function Confirmation({ booking }: ConfirmationProps) {
                                 <div className="space-y-3">
                                     <div className="flex justify-between text-sm">
                                         <span className="text-muted-foreground">Daily Rate</span>
-                                        <span className="font-medium">${booking.daily_rate.toLocaleString()}</span>
+                                        <span className="font-medium">€{booking.daily_rate.toLocaleString()}</span>
                                     </div>
                                     <div className="flex justify-between text-sm">
                                         <span className="text-muted-foreground">Duration</span>
@@ -243,26 +243,26 @@ export default function Confirmation({ booking }: ConfirmationProps) {
                                     </div>
                                     <div className="flex justify-between text-sm">
                                         <span className="text-muted-foreground">Subtotal</span>
-                                        <span className="font-medium">${booking.subtotal.toLocaleString()}</span>
+                                        <span className="font-medium">€{booking.subtotal.toLocaleString()}</span>
                                     </div>
                                     <div className="flex justify-between text-sm">
                                         <span className="text-muted-foreground">Tax</span>
-                                        <span className="font-medium">${booking.tax_amount.toFixed(2)}</span>
+                                        <span className="font-medium">€{booking.tax_amount.toFixed(2)}</span>
                                     </div>
                                     <div className="flex justify-between text-lg font-bold border-t border-border pt-3">
                                         <span>Total</span>
-                                        <span>${booking.total_amount.toLocaleString()}</span>
+                                        <span>€{booking.total_amount.toLocaleString()}</span>
                                     </div>
 
                                     {isPaid ? (
                                         <>
                                             <div className="flex justify-between text-sm text-green-600 bg-green-500/10 rounded-lg p-3">
                                                 <span>Paid</span>
-                                                <span className="font-bold">${booking.total_paid.toLocaleString()}</span>
+                                                <span className="font-bold">€{booking.total_paid.toLocaleString()}</span>
                                             </div>
                                             <div className="flex justify-between text-sm">
                                                 <span className="text-muted-foreground">Balance Due</span>
-                                                <span className="font-medium">${booking.balance_due.toLocaleString()}</span>
+                                                <span className="font-medium">€{booking.balance_due.toLocaleString()}</span>
                                             </div>
                                             <p className="text-xs text-muted-foreground mt-2">
                                                 Remaining balance due at pickup

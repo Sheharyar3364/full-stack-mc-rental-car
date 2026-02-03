@@ -59,10 +59,25 @@ class BookingController extends Controller
             'email' => null,
         ];
 
+        // Get booked dates for this car (pending and confirmed bookings)
+        $bookedDates = $car->bookings()
+            ->whereIn('status', [
+                \App\Enums\BookingStatus::Pending,
+                \App\Enums\BookingStatus::Confirmed,
+                \App\Enums\BookingStatus::Active,
+            ])
+            ->where('dropoff_date', '>=', now())
+            ->get()
+            ->map(fn($booking) => [
+                'start' => $booking->pickup_date->format('Y-m-d'),
+                'end' => $booking->dropoff_date->format('Y-m-d'),
+            ]);
+
         return Inertia::render('bookings/create', [
             'car' => $this->transformCar($car),
             'locations' => $locations,
             'auth' => $authData,
+            'bookedDates' => $bookedDates,
         ]);
     }
 
@@ -96,7 +111,7 @@ class BookingController extends Controller
 
         if (!$car->isAvailableForDates($pickupDate, $dropoffDate)) {
             return back()
-                ->withErrors(['availability' => 'This car is not available for the selected dates.'])
+                ->withErrors(['availability' => 'This car is already booked for the selected dates. Please choose different dates or another vehicle.'])
                 ->withInput();
         }
 
@@ -161,7 +176,7 @@ class BookingController extends Controller
                 'payment_method_types' => ['card'],
                 'line_items' => [[
                     'price_data' => [
-                        'currency' => 'usd',
+                        'currency' => 'eur',
                         'product_data' => [
                             'name' => "Car Rental - {$booking->car->full_name}",
                             'description' => "Booking #{$booking->booking_number} - {$booking->total_days} days",
@@ -281,19 +296,36 @@ class BookingController extends Controller
      */
     private function transformCar(Car $car): array
     {
+        // Handle image path
+        $imagePath = $car->image;
+        if (empty($imagePath) && !empty($car->images)) {
+            $imagePath = is_array($car->images) ? $car->images[0] : null;
+        }
+        if (empty($imagePath)) {
+            $imagePath = $car->featured_image;
+        }
+
+        if (empty($imagePath)) {
+            $image = 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=800';
+        } elseif (str_starts_with($imagePath, 'http')) {
+            $image = $imagePath;
+        } else {
+            $image = asset('storage/' . ltrim($imagePath, '/'));
+        }
+
         return [
             'id' => $car->id,
             'name' => $car->full_name,
             'brand' => $car->brand,
             'model' => $car->model,
             'year' => $car->year,
-            'image' => $car->featured_image ?? $car->image,
-            'images' => $car->images ?? [$car->image],
-            'price' => $car->daily_rate ?? $car->category?->daily_rate ?? 500,
+            'image' => $image,
+            'images' => $car->images ?? [$image],
+            'price' => (float) ($car->daily_rate ?? $car->category?->daily_rate ?? 500),
             'type' => $car->category?->name ?? 'Luxury',
             'seats' => $car->seats,
-            'transmission' => $car->transmission?->value ?? 'Automatic',
-            'fuel' => $car->fuel_type?->value ?? 'Gasoline',
+            'transmission' => $car->transmission?->getLabel() ?? $car->transmission?->value ?? 'Automatic',
+            'fuel' => $car->fuel_type?->getLabel() ?? $car->fuel_type?->value ?? 'Gasoline',
         ];
     }
 
@@ -309,7 +341,23 @@ class BookingController extends Controller
             'car' => [
                 'id' => $booking->car->id,
                 'name' => $booking->car->full_name,
-                'image' => $booking->car->featured_image ?? $booking->car->image,
+                'image' => (function($car) {
+                    $imagePath = $car->image;
+                    if (empty($imagePath) && !empty($car->images)) {
+                        $imagePath = is_array($car->images) ? $car->images[0] : null;
+                    }
+                    if (empty($imagePath)) {
+                        $imagePath = $car->featured_image;
+                    }
+
+                    if (empty($imagePath)) {
+                        return 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=800';
+                    } elseif (str_starts_with($imagePath, 'http')) {
+                        return $imagePath;
+                    } else {
+                        return asset('storage/' . ltrim($imagePath, '/'));
+                    }
+                })($booking->car),
                 'type' => $booking->car->category?->name ?? 'Luxury',
             ],
             'customer' => [
