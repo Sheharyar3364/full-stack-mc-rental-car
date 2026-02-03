@@ -1,5 +1,5 @@
 import { Head, Link } from "@inertiajs/react";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { Layout } from "@/components/frontend/layout";
 import { Hero } from "@/components/frontend/hero";
 import { Card } from "@/components/ui/card";
@@ -12,21 +12,15 @@ import {
     Fuel,
     Settings,
     Shield,
-    Award,
-    Clock,
-    Phone,
+    Star,
     Sparkles,
     Mountain,
     Crown,
-    Search,
-    CalendarCheck,
-    CarFront,
-    Star,
+    Monitor,
+    Zap,
     MapPin,
-    Headphones,
+    ArrowUpRight
 } from "lucide-react";
-
-import { FaWhatsapp } from "react-icons/fa";
 
 interface Car {
     id: number;
@@ -49,122 +43,147 @@ const experiences = [
     {
         id: "grand-tour",
         title: "Grand Tour",
-        subtitle: "Long-distance luxury",
-        icon: <Sparkles className="w-6 h-6" />,
-        image: "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=600",
+        subtitle: "Continental luxury for the nomad soul.",
+        icon: <Sparkles className="w-5 h-5 text-secondary" />,
+        image: "/images/gallery/luxury_suv_gallery_1770125084892.png",
         color: "#3b82f6",
+        className: "md:col-span-2"
     },
     {
         id: "alpine-adventure",
         title: "Alpine Adventure",
-        subtitle: "Conquer terrain",
-        icon: <Mountain className="w-6 h-6" />,
-        image: "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=600",
+        subtitle: "Conquer altitudes with precision.",
+        icon: <Mountain className="w-5 h-5 text-emerald-400" />,
+        image: "/images/gallery/sports_car_mountain_road_1770125099659.png",
         color: "#10b981",
+        className: "md:col-span-1"
     },
     {
         id: "red-carpet",
         title: "Red Carpet",
-        subtitle: "Make an entrance",
-        icon: <Crown className="w-6 h-6" />,
-        image: "https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=600",
+        subtitle: "Arrive in a statement of pure class.",
+        icon: <Crown className="w-5 h-5 text-rose-500" />,
+        image: "/images/gallery/classic_car_european_street_1770125114528.png",
         color: "#ef4444",
-    },
-];
-
-const howItWorks = [
-    {
-        step: "01",
-        icon: <Search className="w-7 h-7" />,
-        title: "Browse & Select",
-        description: "Explore our premium fleet and find your perfect match",
-    },
-    {
-        step: "02",
-        icon: <CalendarCheck className="w-7 h-7" />,
-        title: "Book Online",
-        description: "Choose your dates with instant confirmation",
-    },
-    {
-        step: "03",
-        icon: <CarFront className="w-7 h-7" />,
-        title: "Drive Away",
-        description: "Pick up at your preferred location and enjoy",
+        className: "md:col-span-3"
     },
 ];
 
 const trustSignals = [
     {
-        icon: <Shield className="w-7 h-7" />,
-        title: "Full Insurance",
-        desc: "Comprehensive coverage included",
-        stat: "100%",
+        icon: <Shield className="w-6 h-6" />,
+        title: "Royal Coverage",
+        desc: "Bespoke insurance policies for peace of mind.",
+        stat: "SECURED"
     },
     {
-        icon: <Headphones className="w-7 h-7" />,
-        title: "24/7 Support",
-        desc: "Always here when you need us",
-        stat: "24/7",
+        icon: <Zap className="w-6 h-6" />,
+        title: "24/7 Concierge",
+        desc: "Global support team at your immediate beck and call.",
+        stat: "ALWAYS"
     },
     {
-        icon: <Star className="w-7 h-7" />,
-        title: "Premium Fleet",
-        desc: "Only the finest vehicles",
-        stat: "50+",
-    },
-    {
-        icon: <MapPin className="w-7 h-7" />,
-        title: "Easy Pickup",
-        desc: "Multiple convenient locations",
-        stat: "10+",
-    },
+        icon: <Monitor className="w-6 h-6" />,
+        title: "Digital Sync",
+        desc: "Manage your reservation through our cutting-edge app.",
+        stat: "SYNCED"
+    }
 ];
 
 export default function Home({ featuredCars, locations }: HomeProps) {
     return (
         <Layout>
-            <Head title="MC Rental Cars - Premium Car Rentals" />
+            <Head title="MC Rental Cars | The Pinnacle of Premium Performance" />
             <Hero locations={locations} />
 
-            {/* How It Works - New Conversion Section */}
-            <section className="py-16 sm:py-20 lg:py-24 bg-gradient-to-b from-background to-muted/30 relative overflow-hidden">
-                <div className="container px-4 sm:px-6 mx-auto">
-                    <div className="text-center mb-12 lg:mb-16">
-                        <FadeUpReveal>
-                            <span className="text-secondary text-[10px] sm:text-xs font-black uppercase tracking-[0.3em] mb-3 block">
-                                Simple Process
-                            </span>
+            {/* Featured Collection: Bento Style */}
+            <section className="py-32 bg-[#080808] relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-secondary/5 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2" />
+
+                <div className="container px-6 mx-auto relative z-10">
+                    <div className="flex flex-col md:flex-row justify-between items-end gap-12 mb-20">
+                        <div className="max-w-3xl">
+                            <FadeUpReveal>
+                                <div className="flex items-center gap-3 text-secondary mb-6">
+                                    <Sparkles className="w-4 h-4 fill-current" />
+                                    <span className="text-[10px] font-black uppercase tracking-[0.4em]">The 2026 Collection</span>
+                                </div>
+                            </FadeUpReveal>
+                            <h2 className="text-6xl md:text-8xl font-black uppercase tracking-tighter text-white leading-[0.85]">
+                                <TextReveal>Featured</TextReveal> <br />
+                                <span className="text-white/20"><TextReveal>Masterpieces</TextReveal></span>
+                            </h2>
+                        </div>
+                        <FadeUpReveal delay={0.4}>
+                            <Link href="/cars" className="group">
+                                <MagneticButton className="h-20 px-12 border border-white/10 rounded-full flex items-center gap-4 text-white text-xs font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all">
+                                    Browse Full Catalog <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-2" />
+                                </MagneticButton>
+                            </Link>
                         </FadeUpReveal>
-                        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black uppercase leading-tight tracking-tight">
-                            <TextReveal delay={0.1}>How It</TextReveal>{" "}
-                            <TextReveal className="text-secondary" delay={0.2}>Works</TextReveal>
-                        </h2>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 max-w-5xl mx-auto">
-                        {howItWorks.map((item, i) => (
-                            <FadeUpReveal key={i} delay={0.2 + i * 0.1}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {featuredCars.map((car, i) => (
+                            <FadeUpReveal key={car.id} delay={0.2 + i * 0.1}>
                                 <motion.div
-                                    className="relative text-center p-6 sm:p-8 rounded-2xl bg-card border border-border hover:border-secondary/30 transition-all group"
-                                    whileHover={{ y: -5 }}
+                                    whileHover={{ y: -10 }}
+                                    className="group relative"
                                 >
-                                    {/* Step number */}
-                                    <span className="absolute top-4 right-4 text-[10px] font-black text-muted-foreground/30 tracking-widest">
-                                        {item.step}
-                                    </span>
+                                    <Card className="rounded-[2.5rem] overflow-hidden bg-zinc-900/50 border-white/5 backdrop-blur-sm group-hover:border-secondary/30 transition-all duration-500 overflow-hidden">
+                                        <Link href={`/cars/${car.id}`} className="block relative aspect-[4/5] overflow-hidden">
+                                            <img
+                                                src={car.image}
+                                                alt={car.name}
+                                                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 grayscale-[0.2] group-hover:grayscale-0"
+                                            />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
 
-                                    {/* Icon */}
-                                    <div className="w-16 h-16 rounded-2xl bg-secondary/10 text-secondary flex items-center justify-center mx-auto mb-5 group-hover:bg-secondary group-hover:text-white transition-all">
-                                        {item.icon}
-                                    </div>
+                                            {/* Top Info */}
+                                            <div className="absolute top-8 left-8 flex flex-col gap-2">
+                                                <div className="px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-xl border border-white/10 text-[9px] font-black uppercase tracking-widest text-white">
+                                                    {car.brand}
+                                                </div>
+                                                <div className="px-4 py-1.5 rounded-full bg-secondary/80 backdrop-blur-xl text-[9px] font-black uppercase tracking-widest text-white shadow-lg">
+                                                    Available
+                                                </div>
+                                            </div>
 
-                                    <h3 className="text-lg font-bold mb-2">{item.title}</h3>
-                                    <p className="text-muted-foreground text-sm">{item.description}</p>
+                                            {/* Bottom Info */}
+                                            <div className="absolute bottom-8 left-8 right-8">
+                                                <h3 className="text-4xl font-black text-white uppercase tracking-tighter mb-4 group-hover:text-secondary transition-colors">
+                                                    {car.name}
+                                                </h3>
+                                                <div className="flex gap-4 items-center">
+                                                    <div className="flex items-center gap-2 text-white/50 text-[10px] font-bold uppercase tracking-widest">
+                                                        <Users className="w-3 h-3" /> {car.seats} Seats
+                                                    </div>
+                                                    <div className="w-1 h-1 rounded-full bg-white/20" />
+                                                    <div className="flex items-center gap-2 text-white/50 text-[10px] font-bold uppercase tracking-widest">
+                                                        <Zap className="w-3 h-3" /> {car.transmission}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </Link>
 
-                                    {/* Connector line (desktop only) */}
-                                    {i < howItWorks.length - 1 && (
-                                        <div className="hidden md:block absolute top-1/2 -right-4 lg:-right-4 w-8 lg:w-8 h-px bg-border" />
-                                    )}
+                                        <div className="p-8 flex items-center justify-between">
+                                            <div>
+                                                <span className="text-[10px] font-bold uppercase tracking-widest text-white/30 block mb-1">Starting From</span>
+                                                <div className="text-3xl font-black text-white">
+                                                    €{car.price.toLocaleString()}
+                                                    <span className="text-sm font-light text-white/30 ml-2">/Day</span>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <CompareButton car={car} />
+                                                <Link href={`/cars/${car.id}`}>
+                                                    <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-secondary hover:border-secondary transition-all">
+                                                        <ArrowRight className="w-6 h-6" />
+                                                    </div>
+                                                </Link>
+                                            </div>
+                                        </div>
+                                    </Card>
                                 </motion.div>
                             </FadeUpReveal>
                         ))}
@@ -172,221 +191,94 @@ export default function Home({ featuredCars, locations }: HomeProps) {
                 </div>
             </section>
 
-            {/* Featured Collection */}
-            <section className="py-16 sm:py-24 lg:py-32 bg-background relative overflow-hidden">
-                {/* Background decoration */}
-                <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-secondary/5 to-transparent pointer-events-none" />
-
-                <div className="container px-4 sm:px-6 mx-auto relative z-10">
-                    <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6 lg:gap-8 mb-10 lg:mb-16">
-                        <div>
-                            <FadeUpReveal>
-                                <span className="text-secondary text-[10px] sm:text-xs font-black uppercase tracking-[0.3em] mb-3 block">
-                                    Premium Selection
-                                </span>
-                            </FadeUpReveal>
-                            <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black uppercase leading-[0.95] tracking-tight">
-                                <TextReveal delay={0.1}>Featured</TextReveal>
-                                <br />
-                                <TextReveal className="text-muted-foreground" delay={0.2}>
-                                    Collection
-                                </TextReveal>
-                            </h2>
-                        </div>
-
-                        <FadeUpReveal delay={0.3}>
-                            <Link href="/cars">
-                                <MagneticButton className="h-12 sm:h-14 px-6 sm:px-8 border-2 border-foreground text-foreground font-bold uppercase tracking-widest text-xs sm:text-sm rounded-xl hover:bg-foreground hover:text-background transition-all group">
-                                    View All Fleet
-                                    <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                                </MagneticButton>
-                            </Link>
-                        </FadeUpReveal>
-                    </div>
-
-                    {/* Cards - Horizontal scroll on mobile */}
-                    <div className="relative -mx-4 sm:mx-0">
-                        <div className="flex sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 overflow-x-auto sm:overflow-visible px-4 sm:px-0 pb-4 sm:pb-0 snap-x snap-mandatory sm:snap-none scrollbar-hide">
-                            {featuredCars.map((car, i) => (
-                                <FadeUpReveal key={car.id} delay={0.2 + i * 0.1} className="flex-shrink-0 w-[85%] sm:w-auto snap-center">
-                                    <motion.div
-                                        whileHover={{ y: -8 }}
-                                        transition={{ duration: 0.3 }}
-                                        className="group h-full"
-                                    >
-                                        <Card className="overflow-hidden border-0 bg-card shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer h-full rounded-2xl">
-                                            <Link href={`/cars/${car.id}`}>
-                                                <div className="relative aspect-[4/3] overflow-hidden">
-                                                    <img
-                                                        src={car.image}
-                                                        alt={car.name}
-                                                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                                    />
-                                                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                                                    <div className="absolute top-3 sm:top-4 left-3 sm:left-4">
-                                                        <span className="px-2.5 sm:px-3 py-1 rounded-full bg-secondary text-white text-[9px] sm:text-[10px] font-bold uppercase tracking-widest">
-                                                            {car.type}
-                                                        </span>
-                                                    </div>
-                                                    <div className="absolute bottom-3 sm:bottom-4 left-3 sm:left-4 right-3 sm:right-4">
-                                                        <p className="text-white/60 text-[10px] sm:text-xs uppercase tracking-widest mb-1">
-                                                            {car.brand}
-                                                        </p>
-                                                        <h3 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tight">
-                                                            {car.name}
-                                                        </h3>
-                                                    </div>
-                                                </div>
-                                            </Link>
-
-                                            <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
-                                                <div className="flex items-center justify-between text-muted-foreground text-xs sm:text-sm">
-                                                    <div className="flex items-center gap-1.5 sm:gap-2">
-                                                        <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> {car.seats}
-                                                    </div>
-                                                    <div className="flex items-center gap-1.5 sm:gap-2">
-                                                        <Settings className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> {car.transmission}
-                                                    </div>
-                                                    <div className="flex items-center gap-1.5 sm:gap-2">
-                                                        <Fuel className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> {car.fuel}
-                                                    </div>
-                                                </div>
-
-                                                <div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-border">
-                                                    <div>
-                                                        <p className="text-muted-foreground text-[10px] sm:text-xs uppercase tracking-widest">
-                                                            From
-                                                        </p>
-                                                        <p className="text-xl sm:text-2xl font-black">
-                                                            €{car.price.toLocaleString()}
-                                                            <span className="text-xs sm:text-sm font-normal text-muted-foreground">/day</span>
-                                                        </p>
-                                                    </div>
-                                                    <div className="flex items-center gap-2">
-                                                        <CompareButton car={car} />
-                                                        <Link href={`/cars/${car.id}`}>
-                                                            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-border flex items-center justify-center hover:bg-secondary hover:text-white hover:border-secondary transition-all cursor-pointer">
-                                                                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
-                                                            </div>
-                                                        </Link>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </Card>
-                                    </motion.div>
-                                </FadeUpReveal>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Experience Categories */}
-            <section className="py-16 sm:py-24 lg:py-32 bg-black text-white overflow-hidden">
-                <div className="container px-4 sm:px-6 mx-auto">
-                    <div className="text-center mb-10 lg:mb-16">
+            {/* Immersive Experiences Section */}
+            <section className="py-32 bg-black overflow-hidden relative">
+                <div className="container px-6 mx-auto">
+                    <div className="text-center mb-24">
                         <FadeUpReveal>
-                            <span className="text-secondary text-[10px] sm:text-xs font-black uppercase tracking-[0.3em] mb-3 block">
-                                Beyond Transportation
-                            </span>
+                            <span className="text-secondary text-xs font-black uppercase tracking-[0.4em] mb-4 block">Crafted Moments</span>
                         </FadeUpReveal>
-                        <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black uppercase leading-[0.95]">
-                            <TextReveal delay={0.1}>Choose Your</TextReveal>
-                            <br />
-                            <TextReveal className="italic text-white/80" delay={0.2}>
-                                Experience
-                            </TextReveal>
+                        <h2 className="text-6xl md:text-8xl font-black uppercase text-white tracking-tighter">
+                            <TextReveal>Ultimate</TextReveal> <br />
+                            <span className="text-white/20 italic"><TextReveal>Experiences</TextReveal></span>
                         </h2>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {experiences.map((exp, i) => (
-                            <FadeUpReveal key={exp.id} delay={0.2 + i * 0.1}>
+                            <FadeUpReveal key={exp.id} delay={0.2 + i * 0.1} className={exp.className}>
                                 <Link href={`/experiences#${exp.id}`}>
                                     <motion.div
-                                        className="relative h-[300px] sm:h-[350px] lg:h-[400px] rounded-2xl sm:rounded-3xl overflow-hidden group cursor-pointer"
-                                        whileHover={{ scale: 1.02 }}
-                                        transition={{ duration: 0.3 }}
+                                        className="relative h-[500px] rounded-[3rem] overflow-hidden group cursor-pointer"
+                                        whileHover={{ scale: 0.98 }}
                                     >
                                         <img
                                             src={exp.image}
                                             alt={exp.title}
-                                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                            className="absolute inset-0 w-full h-full object-cover grayscale-[0.4] group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-105"
                                         />
-                                        <div
-                                            className="absolute inset-0 opacity-80 group-hover:opacity-70 transition-opacity"
-                                            style={{
-                                                background: `linear-gradient(to top, ${exp.color}, transparent)`,
-                                            }}
-                                        />
-                                        <div className="absolute inset-0 flex flex-col justify-end p-5 sm:p-6 lg:p-8">
-                                            <div
-                                                className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center mb-3 sm:mb-4"
-                                                style={{ backgroundColor: `${exp.color}40` }}
-                                            >
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
+
+                                        <div className="absolute inset-x-10 bottom-10">
+                                            <div className="w-14 h-14 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 flex items-center justify-center mb-6 group-hover:bg-secondary group-hover:border-secondary transition-all shadow-xl">
                                                 {exp.icon}
                                             </div>
-                                            <h3 className="text-2xl sm:text-3xl font-black uppercase tracking-tight mb-1 sm:mb-2">
-                                                {exp.title}
-                                            </h3>
-                                            <p className="text-white/70 text-sm sm:text-base">{exp.subtitle}</p>
+                                            <h3 className="text-4xl font-black text-white uppercase tracking-tight mb-4">{exp.title}</h3>
+                                            <p className="text-white/60 text-lg leading-snug group-hover:text-white transition-colors">{exp.subtitle}</p>
+                                        </div>
+
+                                        <div className="absolute top-10 right-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-black shadow-2xl">
+                                                <ArrowUpRight className="w-6 h-6" />
+                                            </div>
                                         </div>
                                     </motion.div>
                                 </Link>
                             </FadeUpReveal>
                         ))}
                     </div>
-
-                    <FadeUpReveal delay={0.5}>
-                        <div className="text-center mt-10 lg:mt-12">
-                            <Link href="/experiences">
-                                <MagneticButton className="h-12 sm:h-14 px-8 sm:px-10 border-2 border-white text-white font-bold uppercase tracking-widest text-xs sm:text-sm rounded-xl hover:bg-white hover:text-black transition-all">
-                                    Explore All Experiences
-                                </MagneticButton>
-                            </Link>
-                        </div>
-                    </FadeUpReveal>
                 </div>
             </section>
 
-            {/* Trust Signals - Premium Redesign */}
-            <section className="py-16 sm:py-20 lg:py-24 bg-muted/30 relative overflow-hidden">
-                {/* Subtle background gradient */}
-                <div className="absolute inset-0 bg-gradient-to-br from-secondary/5 via-transparent to-secondary/5 pointer-events-none" />
-
-                <div className="container px-4 sm:px-6 mx-auto relative z-10">
-                    <div className="text-center mb-10 lg:mb-14">
-                        <FadeUpReveal>
-                            <span className="text-secondary text-[10px] sm:text-xs font-black uppercase tracking-[0.3em] mb-3 block">
-                                Why Choose Us
-                            </span>
-                        </FadeUpReveal>
-                        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black uppercase tracking-tight">
-                            <TextReveal delay={0.1}>Trusted by </TextReveal>
-                            <TextReveal className="text-secondary" delay={0.2}>Thousands</TextReveal>
-                        </h2>
-                    </div>
-
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
-                        {trustSignals.map((signal, i) => (
-                            <FadeUpReveal key={i} delay={i * 0.1}>
-                                <motion.div
-                                    className="relative text-center p-5 sm:p-6 lg:p-8 rounded-2xl bg-background border border-border hover:border-secondary/30 transition-all group"
-                                    whileHover={{ y: -5 }}
-                                >
-                                    {/* Stat badge */}
-                                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-secondary text-white text-[10px] font-black rounded-full">
-                                        {signal.stat}
-                                    </div>
-
-                                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-secondary/10 text-secondary flex items-center justify-center mx-auto mb-4 group-hover:bg-secondary group-hover:text-white transition-all">
-                                        {signal.icon}
-                                    </div>
-                                    <h4 className="font-bold text-sm sm:text-base lg:text-lg mb-1">{signal.title}</h4>
-                                    <p className="text-muted-foreground text-xs sm:text-sm">{signal.desc}</p>
-                                </motion.div>
+            {/* Editorial Trust Signals */}
+            <section className="py-40 bg-[#050505] relative">
+                <div className="container px-6 mx-auto">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
+                        <div>
+                            <FadeUpReveal>
+                                <span className="text-secondary text-[10px] font-black uppercase tracking-[0.5em] mb-8 block">Brand Philosophy</span>
                             </FadeUpReveal>
-                        ))}
+                            <h2 className="text-5xl md:text-7xl font-black uppercase tracking-tighter text-white leading-none mb-12">
+                                For Those Who <br />
+                                <span className="text-white/30">Never Compromise</span>
+                            </h2>
+                            <p className="text-white/50 text-xl font-light leading-relaxed max-w-lg mb-12">
+                                Since our inception, we have curated a fleet that transcends utility. Every vehicle in our
+                                stable is a testament to the pursuit of absolute perfection.
+                            </p>
+                            <Link href="/contact" className="group">
+                                <MagneticButton className="h-20 px-12 bg-zinc-900 border border-white/10 rounded-full flex items-center gap-4 text-white text-xs font-black uppercase tracking-widest hover:bg-secondary hover:border-secondary transition-all">
+                                    Contact Our Concierge <ArrowRight className="w-4 h-4" />
+                                </MagneticButton>
+                            </Link>
+                        </div>
+
+                        <div className="grid gap-8">
+                            {trustSignals.map((signal, i) => (
+                                <FadeUpReveal key={i} delay={i * 0.1}>
+                                    <div className="group p-10 rounded-[2.5rem] bg-zinc-900/40 border border-white/5 hover:border-secondary/30 transition-all flex items-center gap-10">
+                                        <div className="w-20 h-20 rounded-3xl bg-white/5 flex items-center justify-center text-secondary group-hover:bg-secondary group-hover:text-white transition-all shadow-inner">
+                                            {signal.icon}
+                                        </div>
+                                        <div className="flex-1">
+                                            <div className="text-[10px] font-black text-secondary uppercase tracking-[0.4em] mb-2">{signal.stat}</div>
+                                            <h4 className="text-2xl font-black text-white uppercase tracking-tight mb-2">{signal.title}</h4>
+                                            <p className="text-white/40 text-sm leading-relaxed">{signal.desc}</p>
+                                        </div>
+                                    </div>
+                                </FadeUpReveal>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </section>

@@ -1,14 +1,15 @@
 import { useRef, useState } from "react";
 import { Link, router } from "@inertiajs/react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { MagneticButton } from "@/components/ui/magnetic-button";
 import { TextReveal, FadeUpReveal } from "@/components/ui/text-reveal";
-import { MapPin, Calendar, Clock, ArrowRight, Star, Sparkles } from "lucide-react";
+import { MapPin, Calendar, ArrowRight, Star, Sparkles, ShieldCheck, Zap } from "lucide-react";
 
 export function Hero({ locations = [] }: { locations?: { id: number; name: string }[] }) {
     const [locationId, setLocationId] = useState("");
     const [pickupDate, setPickupDate] = useState("");
     const [dropoffDate, setDropoffDate] = useState("");
+    const [isFocused, setIsFocused] = useState(false);
 
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -17,202 +18,218 @@ export function Hero({ locations = [] }: { locations?: { id: number; name: strin
         if (locationId) params.location_id = locationId;
         if (pickupDate) params.pickup_date = pickupDate;
         if (dropoffDate) params.dropoff_date = dropoffDate;
-
         router.get("/cars", params);
     };
+
     const { scrollY } = useScroll();
-    const y = useTransform(scrollY, [0, 1000], [0, 400]);
-    const opacity = useTransform(scrollY, [0, 600], [1, 0]);
+    const y = useTransform(scrollY, [0, 800], [0, 300]);
+    const opacity = useTransform(scrollY, [0, 500], [1, 0]);
+    const scale = useTransform(scrollY, [0, 800], [1, 1.1]);
 
     return (
         <div
             ref={containerRef}
-            className="relative w-full min-h-screen flex items-center justify-center overflow-hidden bg-black"
+            className="relative w-full min-h-[110vh] flex items-center justify-center overflow-hidden bg-[#050505]"
         >
-            {/* Background Image with Ken Burns Effect */}
+            {/* Cinematic Background Layer */}
             <motion.div
                 className="absolute inset-0 z-0"
-                style={{ y }}
-                initial={{ scale: 1.1 }}
-                animate={{ scale: 1 }}
-                transition={{ duration: 20, ease: "linear", repeat: Infinity, repeatType: "reverse" }}
+                style={{ y, scale }}
             >
                 <img
-                    src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=2400&q=80"
+                    src="/images/gallery/hero_bg.png"
                     alt="Luxury Car Background"
-                    className="w-full h-full object-cover opacity-70"
+                    className="w-full h-full object-cover opacity-60 grayscale-[0.2]"
                 />
 
-                {/* Cinematic Overlays */}
-                <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/60 to-black/30" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/40" />
+                {/* Advanced Overlays */}
+                <div className="absolute inset-0 bg-gradient-to-r from-black via-black/40 to-transparent z-10" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/60 z-10" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(26,115,232,0.15)_0%,transparent_50%)] z-10" />
 
-                {/* Radial spotlight effect */}
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,black_100%)] opacity-60" />
-
-                {/* Grain Texture for Film Look */}
-                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay" />
+                {/* Digital Grain/Noise */}
+                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.15] mix-blend-overlay z-10" />
             </motion.div>
 
-            {/* Main Content */}
+            {/* Main Content Container */}
             <motion.div
-                className="container relative z-20 flex flex-col lg:flex-row items-center lg:items-center gap-12 lg:gap-24 px-6 pt-20"
+                className="container relative z-30 flex flex-col lg:flex-row items-center justify-between gap-16 px-6 pt-24 pb-32"
                 style={{ opacity }}
             >
-                {/* Left: Branding & Copy */}
-                <div className="flex-1 w-full max-w-3xl text-center lg:text-left">
+                {/* Left Side: Editorial Branding */}
+                <div className="flex-1 w-full max-w-4xl">
                     <FadeUpReveal delay={0.2}>
-                        <div className="flex items-center justify-center lg:justify-start gap-4 mb-10">
-                            <span className="px-4 py-1.5 rounded-full border border-white/20 bg-white/5 text-[10px] font-bold uppercase tracking-[0.3em] text-white/90 backdrop-blur-md shadow-lg">
-                                Model Year 2026
+                        <div className="flex flex-wrap items-center gap-4 mb-12">
+                            <motion.div
+                                initial={{ width: 0 }}
+                                animate={{ width: 40 }}
+                                transition={{ duration: 1, delay: 0.5 }}
+                                className="h-px bg-secondary"
+                            />
+                            <span className="text-secondary text-[10px] font-black uppercase tracking-[0.5em]">
+                                Est. 2026 • Private Collection
                             </span>
-                            <div className="flex gap-0.5 text-secondary drop-shadow-[0_0_8px_rgba(26,115,232,0.5)]">
-                                {[...Array(5)].map((_, i) => (
-                                    <Star key={i} className="w-3.5 h-3.5 fill-current" />
-                                ))}
+                            <div className="flex gap-1 items-center px-3 py-1 bg-white/5 backdrop-blur-md rounded-full border border-white/10">
+                                <ShieldCheck className="w-3 h-3 text-secondary" />
+                                <span className="text-[9px] font-bold text-white/70 uppercase tracking-widest">Verified Luxury</span>
                             </div>
                         </div>
                     </FadeUpReveal>
 
-                    <h1 className="font-black uppercase leading-[0.85] tracking-tighter mb-10">
-                        <TextReveal
-                            className="text-white block text-[clamp(3.5rem,11vw,8rem)] drop-shadow-2xl"
-                            delay={0.3}
-                        >
-                            BEYOND
-                        </TextReveal>
-                        <div className="flex flex-col lg:block">
+                    <h1 className="font-black uppercase leading-[0.8] tracking-tighter mb-12">
+                        <div className="overflow-hidden">
                             <TextReveal
-                                className="text-secondary block text-[clamp(3.5rem,11vw,8rem)] lg:inline-block lg:mr-5 drop-shadow-[0_0_30px_rgba(26,115,232,0.6)]"
+                                className="text-white block text-[clamp(4rem,12vw,9rem)]"
+                                delay={0.3}
+                            >
+                                DEFINING
+                            </TextReveal>
+                        </div>
+                        <div className="flex items-center gap-6 overflow-hidden">
+                            <TextReveal
+                                className="text-secondary block text-[clamp(4rem,12vw,9rem)] drop-shadow-[0_0_40px_rgba(26,115,232,0.4)]"
                                 delay={0.4}
                             >
-                                FIRST
+                                MASTER
                             </TextReveal>
+                            <motion.div
+                                initial={{ scaleX: 0 }}
+                                animate={{ scaleX: 1 }}
+                                transition={{ duration: 1, delay: 0.8 }}
+                                className="h-2 w-32 bg-white/10 origin-left hidden lg:block"
+                            />
+                        </div>
+                        <div className="overflow-hidden">
                             <TextReveal
-                                className="text-white block text-[clamp(3.5rem,11vw,8rem)] lg:inline-block drop-shadow-2xl"
+                                className="text-white block text-[clamp(4rem,12vw,9rem)]"
                                 delay={0.5}
                             >
-                                CLASS
+                                PIECES
                             </TextReveal>
                         </div>
                     </h1>
 
                     <FadeUpReveal delay={0.6}>
-                        <p className="text-white/80 text-lg md:text-xl font-light max-w-xl mx-auto lg:mx-0 leading-relaxed mb-12 tracking-wide">
-                            Experience the art of motion. A curated collection of the world's most prestigious vehicles, ready for your command.
-                        </p>
+                        <div className="flex flex-col md:flex-row items-start md:items-center gap-8 mb-16">
+                            <p className="text-white/40 text-lg md:text-xl font-medium max-w-md leading-relaxed tracking-tight border-l-2 border-secondary/50 pl-6">
+                                Not just a rental service. An exclusive gateway to the world's most desired engineering marvels.
+                            </p>
+                            <div className="hidden md:block transition-transform hover:rotate-12">
+                                <Sparkles className="w-8 h-8 text-secondary/30" />
+                            </div>
+                        </div>
                     </FadeUpReveal>
 
                     <FadeUpReveal delay={0.8}>
-                        <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
-                            <Link href="/cars" className="w-full sm:w-auto group">
-                                <MagneticButton className="relative w-full sm:w-auto h-16 px-12 bg-white text-black font-black uppercase text-sm tracking-[0.2em] overflow-hidden hover:scale-105 transition-all duration-300 shadow-2xl">
-                                    <span className="relative z-10">View Collection</span>
-                                    <div className="absolute inset-0 bg-gradient-to-r from-secondary to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                        <div className="flex flex-wrap items-center gap-6">
+                            <Link href="/cars" className="group">
+                                <MagneticButton className="h-20 px-14 bg-white text-black font-black uppercase text-xs tracking-[0.3em] rounded-full overflow-hidden shadow-[0_0_40px_rgba(255,255,255,0.15)] hover:shadow-secondary/20 transition-all duration-500">
+                                    <span className="relative z-10 flex items-center gap-3">
+                                        Explore Fleet <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-2" />
+                                    </span>
                                 </MagneticButton>
                             </Link>
-                            <Link href="/experiences" className="w-full sm:w-auto group">
-                                <button className="relative w-full sm:w-auto h-16 px-12 border-2 border-white/30 text-white font-bold uppercase text-sm tracking-[0.2em] hover:border-white/60 transition-all duration-300 backdrop-blur-sm text-center flex items-center justify-center gap-3 overflow-hidden">
-                                    <span className="relative z-10">Experiences</span>
-                                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform relative z-10" />
-                                    <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                                </button>
-                            </Link>
+                            <div className="flex -space-x-3 items-center group cursor-pointer">
+                                {[1, 2, 3].map((i) => (
+                                    <div key={i} className="w-12 h-12 rounded-full border-2 border-black bg-zinc-800 flex items-center justify-center overflow-hidden transition-transform group-hover:translate-x-1">
+                                        <img src={`https://i.pravatar.cc/100?u=${i}`} alt="user" />
+                                    </div>
+                                ))}
+                                <div className="pl-6">
+                                    <div className="text-white font-bold text-sm tracking-tight">Trusted by 5,000+</div>
+                                    <div className="flex gap-0.5 text-secondary">
+                                        {[...Array(5)].map((_, i) => <Star key={i} className="w-2.5 h-2.5 fill-current" />)}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </FadeUpReveal>
                 </div>
 
-                {/* Right: Premium Booking Widget */}
-                <FadeUpReveal delay={0.7} className="hidden lg:block w-full max-w-md">
-                    <div className="relative group/card">
-                        {/* Glow effect behind card */}
-                        <div className="absolute -inset-1 bg-gradient-to-r from-secondary/20 via-blue-500/20 to-secondary/20 rounded-3xl blur-2xl opacity-0 group-hover/card:opacity-100 transition-opacity duration-700" />
+                {/* Right Side: High-Tech Booking Terminal */}
+                <FadeUpReveal delay={0.9} className="w-full lg:max-w-[440px]">
+                    <div
+                        className={`relative transition-all duration-700 ${isFocused ? 'scale-[1.02]' : 'scale-100'}`}
+                        onMouseEnter={() => setIsFocused(true)}
+                        onMouseLeave={() => setIsFocused(false)}
+                    >
+                        {/* Plasma Aura Effect */}
+                        <div className="absolute -inset-4 bg-gradient-to-br from-secondary/20 via-blue-500/10 to-purple-500/20 rounded-[3rem] blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
 
-                        <div className="relative bg-black/40 backdrop-blur-2xl border border-white/10 p-10 shadow-2xl overflow-hidden rounded-2xl group-hover/card:border-white/20 transition-all duration-500">
-                            {/* Animated gradient background */}
-                            <div className="absolute inset-0 bg-gradient-to-br from-secondary/5 via-transparent to-blue-600/5 opacity-0 group-hover/card:opacity-100 transition-opacity duration-700" />
-
-                            {/* Top accent line with animation */}
-                            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-secondary to-transparent opacity-60" />
+                        <div className="relative bg-[#0A0A0A]/60 backdrop-blur-3xl border border-white/5 rounded-[2.5rem] p-10 shadow-[0_40px_100px_rgba(0,0,0,0.6)] overflow-hidden">
+                            {/* Technical Details Overlay */}
+                            <div className="absolute top-0 right-0 p-6 opacity-20 pointer-events-none">
+                                <div className="text-[8px] font-mono text-white/50 space-y-1">
+                                    <div>AUTH_NODE: 0xFF12</div>
+                                    <div>ENCRYPT: AES-256</div>
+                                    <div>LAT: 45.4642° N</div>
+                                </div>
+                            </div>
 
                             <div className="relative z-10">
-                                <div className="flex items-center justify-between mb-10">
-                                    <h3 className="text-white font-bold uppercase tracking-[0.25em] text-xs flex items-center gap-3">
-                                        <div className="w-1 h-5 bg-gradient-to-b from-secondary to-blue-600 rounded-full" />
-                                        <span>Quick Reservation</span>
-                                    </h3>
-                                    <Sparkles className="w-4 h-4 text-secondary/60 animate-pulse" />
+                                <div className="flex items-center gap-4 mb-10">
+                                    <div className="w-12 h-12 rounded-2xl bg-secondary/10 flex items-center justify-center border border-secondary/20 group-hover:bg-secondary group-hover:text-white transition-all duration-500">
+                                        <Zap className="w-6 h-6 text-secondary group-hover:text-white" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-white font-black uppercase tracking-[0.2em] text-[10px] mb-1">Instant Access</h3>
+                                        <div className="h-1 w-12 bg-secondary/60 rounded-full" />
+                                    </div>
                                 </div>
 
-                                <div className="space-y-7">
-                                    <div className="space-y-3">
-                                        <label className="text-[10px] uppercase tracking-[0.2em] text-white/50 font-semibold flex items-center gap-2">
-                                            <MapPin className="w-3 h-3" />
-                                            Location
-                                        </label>
-                                        <div className="relative group/input">
+                                <div className="space-y-8">
+                                    {/* Location Input */}
+                                    <div className="group/field relative">
+                                        <label className="text-[9px] font-black uppercase tracking-[0.3em] text-white/30 mb-3 block">Pick-up Location</label>
+                                        <div className="relative">
+                                            <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 group-focus-within/field:text-secondary transition-colors" />
                                             <select
                                                 value={locationId}
                                                 onChange={(e) => setLocationId(e.target.value)}
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-4 text-white text-sm placeholder:text-white/30 focus:bg-white/10 focus:border-secondary/50 focus:ring-2 focus:ring-secondary/20 transition-all duration-300 outline-none appearance-none cursor-pointer"
+                                                className="w-full bg-white/[0.03] border border-white/5 rounded-2xl pl-14 pr-6 py-5 text-white text-sm focus:bg-white/[0.07] focus:border-secondary/40 focus:ring-4 focus:ring-secondary/10 transition-all outline-none appearance-none cursor-pointer"
                                             >
-                                                <option value="" className="bg-black text-white">Select Location</option>
-                                                {locations.map(loc => (
-                                                    <option key={loc.id} value={loc.id} className="bg-black text-white">
-                                                        {loc.name}
-                                                    </option>
-                                                ))}
+                                                <option value="" className="bg-zinc-900">Select City</option>
+                                                {locations.map(loc => <option key={loc.id} value={loc.id} className="bg-zinc-900">{loc.name}</option>)}
                                             </select>
-                                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none">
-                                                <ArrowRight className="w-4 h-4 text-white/30 rotate-90" />
-                                            </div>
-                                            <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-secondary/0 via-secondary/5 to-secondary/0 opacity-0 group-hover/input:opacity-100 transition-opacity pointer-events-none" />
                                         </div>
                                     </div>
 
-                                    <div className="grid grid-cols-2 gap-5">
-                                        <div className="space-y-3">
-                                            <label className="text-[10px] uppercase tracking-[0.2em] text-white/50 font-semibold flex items-center gap-2">
-                                                <Calendar className="w-3 h-3" />
-                                                Pickup Date
-                                            </label>
-                                            <div className="relative group/input text-white/30">
+                                    {/* Date Range */}
+                                    <div className="grid grid-cols-2 gap-6">
+                                        <div className="group/field relative">
+                                            <label className="text-[9px] font-black uppercase tracking-[0.3em] text-white/30 mb-3 block">From</label>
+                                            <div className="relative">
+                                                <Calendar className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 group-focus-within/field:text-secondary transition-colors pointer-events-none" />
                                                 <input
                                                     type="date"
                                                     value={pickupDate}
                                                     onChange={(e) => setPickupDate(e.target.value)}
-                                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-4 text-white text-sm placeholder:text-white/30 focus:bg-white/10 focus:border-secondary/50 focus:ring-2 focus:ring-secondary/20 transition-all duration-300 outline-none [color-scheme:dark]"
+                                                    className="w-full bg-white/[0.03] border border-white/5 rounded-2xl pl-14 pr-4 py-5 text-white text-[11px] focus:bg-white/[0.07] focus:border-secondary/40 transition-all outline-none [color-scheme:dark]"
                                                 />
-                                                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-secondary/0 via-secondary/5 to-secondary/0 opacity-0 group-hover/input:opacity-100 transition-opacity pointer-events-none" />
                                             </div>
                                         </div>
-                                        <div className="space-y-3">
-                                            <label className="text-[10px] uppercase tracking-[0.2em] text-white/50 font-semibold flex items-center gap-2">
-                                                <Calendar className="w-3 h-3" />
-                                                Drop-off
-                                            </label>
-                                            <div className="relative group/input">
+                                        <div className="group/field relative">
+                                            <label className="text-[9px] font-black uppercase tracking-[0.3em] text-white/30 mb-3 block">To</label>
+                                            <div className="relative">
+                                                <Calendar className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 group-focus-within/field:text-secondary transition-colors pointer-events-none" />
                                                 <input
                                                     type="date"
                                                     value={dropoffDate}
                                                     onChange={(e) => setDropoffDate(e.target.value)}
-                                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-4 text-white text-sm placeholder:text-white/30 focus:bg-white/10 focus:border-secondary/50 focus:ring-2 focus:ring-secondary/20 transition-all duration-300 outline-none [color-scheme:dark]"
+                                                    className="w-full bg-white/[0.03] border border-white/5 rounded-2xl pl-14 pr-4 py-5 text-white text-[11px] focus:bg-white/[0.07] focus:border-secondary/40 transition-all outline-none [color-scheme:dark]"
                                                 />
-                                                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-secondary/0 via-secondary/5 to-secondary/0 opacity-0 group-hover/input:opacity-100 transition-opacity pointer-events-none" />
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="block mt-8">
-                                        <button
-                                            onClick={handleSearch}
-                                            className="relative w-full h-16 bg-gradient-to-r from-secondary to-blue-600 hover:from-secondary/90 hover:to-blue-600/90 text-white font-black uppercase tracking-[0.25em] text-sm transition-all duration-300 flex items-center justify-center gap-3 group overflow-hidden shadow-lg shadow-secondary/30 hover:shadow-secondary/50 hover:scale-[1.02] active:scale-[0.98] rounded-xl"
-                                        >
-                                            <span className="relative z-10">Search Availability</span>
-                                            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform relative z-10" />
-                                            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-                                        </button>
-                                    </div>
+                                    {/* Submit Action */}
+                                    <button
+                                        onClick={handleSearch}
+                                        className="relative w-full h-20 bg-secondary hover:bg-secondary/90 text-white font-black uppercase tracking-[0.4em] text-[10px] rounded-2xl transition-all duration-500 shadow-[0_20px_50px_rgba(26,115,232,0.3)] hover:shadow-secondary/50 overflow-hidden flex items-center justify-center gap-4 group/btn"
+                                    >
+                                        <span className="relative z-10">Check Availability</span>
+                                        <div className="absolute inset-x-0 bottom-0 h-1 bg-white/20 scale-x-0 group-hover/btn:scale-x-100 transition-transform duration-700" />
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -220,17 +237,16 @@ export function Hero({ locations = [] }: { locations?: { id: number; name: strin
                 </FadeUpReveal>
             </motion.div>
 
-            {/* Scroll Indicator */}
-            <motion.div
-                className="absolute bottom-12 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gap-3"
-                animate={{ y: [0, 10, 0], opacity: [0.4, 1, 0.4] }}
-                transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-            >
-                <div className="w-[1px] h-16 bg-gradient-to-b from-transparent via-white/40 to-transparent" />
-                <span className="text-white/50 text-[8px] uppercase tracking-[0.3em] font-semibold">
-                    Scroll
-                </span>
-            </motion.div>
+            {/* Side Coordinates Decoration */}
+            <div className="absolute left-10 top-1/2 -translate-y-1/2 space-y-24 hidden xl:block text-[10px] font-mono text-white/10 uppercase tracking-[0.5em] [writing-mode:vertical-lr]">
+                <span>Global Discovery Hub</span>
+                <span>Active 24/7/365</span>
+            </div>
+
+            <div className="absolute right-10 top-1/2 -translate-y-1/2 space-y-24 hidden xl:block text-[10px] font-mono text-white/10 uppercase tracking-[0.5em] [writing-mode:vertical-lr] rotate-180">
+                <span>Secure Terminal 0.1v</span>
+                <span>Automated Sync</span>
+            </div>
         </div>
     );
 }
