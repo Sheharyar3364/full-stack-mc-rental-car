@@ -5,6 +5,7 @@ import { MagneticButton } from "@/components/ui/magnetic-button";
 import { Menu, X, ChevronDown, Sparkles, Mountain, Crown, Users } from "lucide-react";
 import { ModeToggle } from "@/components/ui/mode-toggle";
 import { useSoundEffects } from "@/hooks/use-sound-effects";
+import { SharedData } from "@/types";
 
 const experiences = [
     { id: "grand-tour", label: "The Grand Tour", icon: <Sparkles className="w-4 h-4" />, color: "#3b82f6" },
@@ -17,7 +18,8 @@ export function Navbar() {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isExperiencesOpen, setIsExperiencesOpen] = useState(false);
-    const { url } = usePage();
+    const { url, props } = usePage<SharedData>();
+    const { auth } = props;
 
     const [location, setLocation] = useState(url);
     const { playClick } = useSoundEffects();
@@ -165,22 +167,52 @@ export function Navbar() {
                         <ModeToggle className={isScrolled ? "text-foreground hover:bg-muted/50" : "text-white hover:bg-white/10"} />
                     </div>
 
-                    {/* My Account Link - shows when user is authenticated */}
-                    <Link href="/account">
-                        <motion.div
-                            className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer ${isActive("/account")
-                                    ? "text-secondary bg-secondary/10"
-                                    : isScrolled
-                                        ? "text-foreground/80 hover:text-foreground hover:bg-muted/50"
-                                        : "text-white/90 hover:text-white hover:bg-white/10"
-                                }`}
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.98 }}
-                            onClick={() => playClick()}
-                        >
-                            My Account
-                        </motion.div>
-                    </Link>
+                    {/* Auth Links */}
+                    {auth.user ? (
+                        <>
+                            <Link href="/account">
+                                <motion.div
+                                    className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer ${isActive("/account")
+                                        ? "text-secondary bg-secondary/10"
+                                        : isScrolled
+                                            ? "text-foreground/80 hover:text-foreground hover:bg-muted/50"
+                                            : "text-white/90 hover:text-white hover:bg-white/10"
+                                        }`}
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    onClick={() => playClick()}
+                                >
+                                    My Account
+                                </motion.div>
+                            </Link>
+                            <Link
+                                href="/logout"
+                                method="post"
+                                as="button"
+                                className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer ${isScrolled
+                                    ? "text-foreground/80 hover:text-foreground hover:bg-muted/50"
+                                    : "text-white/90 hover:text-white hover:bg-white/10"
+                                    }`}
+                                onClick={() => playClick()}
+                            >
+                                Logout
+                            </Link>
+                        </>
+                    ) : (
+                        <Link href="/login">
+                            <motion.div
+                                className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer ${isScrolled
+                                    ? "text-foreground/80 hover:text-foreground hover:bg-muted/50"
+                                    : "text-white/90 hover:text-white hover:bg-white/10"
+                                    }`}
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={() => playClick()}
+                            >
+                                Login
+                            </motion.div>
+                        </Link>
+                    )}
 
                     <Link href="/cars">
                         <MagneticButton
@@ -265,10 +297,50 @@ export function Navbar() {
                                 </motion.div>
                             ))}
 
+                            {/* Mobile Auth Links */}
+                            <motion.div
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: navLinks.length * 0.05, type: "spring", stiffness: 300, damping: 24 }}
+                                className="pt-4 border-t border-border/50"
+                            >
+                                {auth.user ? (
+                                    <>
+                                        <Link
+                                            href="/account"
+                                            className={`text-2xl font-black py-4 px-4 block transition-all rounded-xl ${isActive("/account")
+                                                ? "text-secondary bg-secondary/10"
+                                                : "text-foreground hover:text-secondary hover:bg-muted/50"
+                                                }`}
+                                            onClick={() => setIsMobileMenuOpen(false)}
+                                        >
+                                            My Account
+                                        </Link>
+                                        <Link
+                                            href="/logout"
+                                            method="post"
+                                            as="button"
+                                            className="text-2xl font-black py-4 px-4 block w-full text-left transition-all rounded-xl text-foreground hover:text-red-500 hover:bg-muted/50"
+                                            onClick={() => setIsMobileMenuOpen(false)}
+                                        >
+                                            Logout
+                                        </Link>
+                                    </>
+                                ) : (
+                                    <Link
+                                        href="/login"
+                                        className="text-2xl font-black py-4 px-4 block transition-all rounded-xl text-foreground hover:text-secondary hover:bg-muted/50"
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                    >
+                                        Login
+                                    </Link>
+                                )}
+                            </motion.div>
+
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.3 }}
+                                transition={{ delay: (navLinks.length + 1) * 0.05 }}
                                 className="pt-6 mt-4 border-t border-border/50"
                             >
                                 <Link href="/cars" onClick={() => setIsMobileMenuOpen(false)}>

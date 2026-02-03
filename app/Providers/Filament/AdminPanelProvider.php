@@ -42,6 +42,9 @@ class AdminPanelProvider extends PanelProvider
                 // FilamentInfoWidget::class,
             ])
             ->brandName("MC Rentals Cars")
+            ->brandLogo(asset('logo.png'))  
+            ->favicon(asset('logo.png'))
+            ->sidebarCollapsibleOnDesktop()
             // ->brandLogo('/images/logo.png')
             ->middleware([
                 EncryptCookies::class,

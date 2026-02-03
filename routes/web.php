@@ -69,8 +69,9 @@ Route::middleware([
     'auth',
     ValidateSessionWithWorkOS::class,
 ])->group(function () {
+   
     Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
+        return redirect()->route('account.dashboard');
     })->name('dashboard');
 
     // User Account Routes
