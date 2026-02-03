@@ -59,6 +59,11 @@ Route::get('/experience/{id}', [ExperienceController::class, 'show']); // Alias
 Route::get('/journal', [JournalController::class, 'index'])->name('journal.index');
 Route::get('/journal/{id}', [JournalController::class, 'show'])->name('journal.show');
 
+// Gallery
+Route::get('/gallery', function () {
+    return Inertia::render('gallery');
+})->name('gallery');
+
 /*
 |--------------------------------------------------------------------------
 | Authenticated Routes

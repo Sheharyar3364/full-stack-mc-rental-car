@@ -40,6 +40,7 @@ export function Navbar() {
     const navLinks = [
         { href: "/", label: "Home" },
         { href: "/cars", label: "Fleet" },
+        { href: "/gallery", label: "Gallery" },
         { href: "/experiences", label: "Experiences", hasDropdown: true },
         { href: "/journal", label: "Journal" },
         { href: "/contact", label: "Contact" },
