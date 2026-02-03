@@ -61,6 +61,9 @@ interface Filters {
     categories?: number[];
     min_price?: number;
     max_price?: number;
+    pickup_date?: string;
+    dropoff_date?: string;
+    location_id?: number | string;
     sort?: string;
 }
 
@@ -68,11 +71,12 @@ interface CarsIndexProps {
     cars: Car[];
     categories: Category[];
     brands: string[];
+    locations: { id: number; name: string }[];
     pagination: Pagination;
     filters: Filters;
 }
 
-export default function CarsIndex({ cars, categories, brands, pagination, filters }: CarsIndexProps) {
+export default function CarsIndex({ cars, categories, brands, locations, pagination, filters }: CarsIndexProps) {
     const [showFilters, setShowFilters] = useState(false);
     const [search, setSearch] = useState(filters.search || "");
     const [selectedBrands, setSelectedBrands] = useState<string[]>(filters.brands || []);
@@ -82,6 +86,9 @@ export default function CarsIndex({ cars, categories, brands, pagination, filter
         filters.max_price || 2000,
     ]);
     const [sortBy, setSortBy] = useState(filters.sort || "featured");
+    const [pickupDate, setPickupDate] = useState(filters.pickup_date || "");
+    const [dropoffDate, setDropoffDate] = useState(filters.dropoff_date || "");
+    const [locationId, setLocationId] = useState(filters.location_id || "");
 
     const applyFilters = () => {
         const params: any = {};
@@ -92,6 +99,9 @@ export default function CarsIndex({ cars, categories, brands, pagination, filter
         if (priceRange[0] > 0) params.min_price = priceRange[0];
         if (priceRange[1] < 2000) params.max_price = priceRange[1];
         if (sortBy !== "featured") params.sort = sortBy;
+        if (pickupDate) params.pickup_date = pickupDate;
+        if (dropoffDate) params.dropoff_date = dropoffDate;
+        if (locationId) params.location_id = locationId;
 
         router.get("/cars", params, {
             preserveState: true,
@@ -119,6 +129,9 @@ export default function CarsIndex({ cars, categories, brands, pagination, filter
         if (priceRange[0] > 0) params.min_price = priceRange[0];
         if (priceRange[1] < 2000) params.max_price = priceRange[1];
         if (sortBy !== "featured") params.sort = sortBy;
+        if (pickupDate) params.pickup_date = pickupDate;
+        if (dropoffDate) params.dropoff_date = dropoffDate;
+        if (locationId) params.location_id = locationId;
 
         router.get("/cars", params, {
             preserveScroll: true,
@@ -159,6 +172,33 @@ export default function CarsIndex({ cars, categories, brands, pagination, filter
                                 onKeyDown={(e) => e.key === "Enter" && applyFilters()}
                                 className="pl-12 h-14 rounded-xl border-border bg-card text-base"
                             />
+                        </div>
+                        <div className="flex flex-col sm:flex-row gap-4 flex-1">
+                            <Select value={String(locationId)} onValueChange={setLocationId}>
+                                <SelectTrigger className="h-14 rounded-xl border-border bg-card">
+                                    <SelectValue placeholder="Select Location" />
+                                </SelectTrigger>
+                                <SelectContent className="rounded-xl">
+                                    <SelectItem value="none">All Locations</SelectItem>
+                                    {locations.map(loc => (
+                                        <SelectItem key={loc.id} value={String(loc.id)}>{loc.name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <div className="flex flex-1 gap-2">
+                                <Input
+                                    type="date"
+                                    value={pickupDate}
+                                    onChange={(e) => setPickupDate(e.target.value)}
+                                    className="h-14 rounded-xl border-border bg-card text-base flex-1"
+                                />
+                                <Input
+                                    type="date"
+                                    value={dropoffDate}
+                                    onChange={(e) => setDropoffDate(e.target.value)}
+                                    className="h-14 rounded-xl border-border bg-card text-base flex-1"
+                                />
+                            </div>
                         </div>
                         <Button
                             onClick={() => setShowFilters(true)}
@@ -283,89 +323,112 @@ export default function CarsIndex({ cars, categories, brands, pagination, filter
                                 </p>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                                {cars.map((car, index) => (
-                                    <motion.div
-                                        key={car.id}
-                                        initial={{ opacity: 0, y: 20 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: index * 0.05 }}
-                                    >
-                                        <Card className="group overflow-hidden rounded-2xl border-border hover:shadow-xl hover:shadow-secondary/5 transition-all duration-300">
-                                            <Link href={`/cars/${car.id}`}>
-                                                <div className="relative aspect-[4/3] overflow-hidden cursor-pointer">
-                                                    <img
-                                                        src={car.image}
-                                                        alt={car.name}
-                                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                                    />
-                                                    <div className="absolute top-4 left-4">
-                                                        <span className="px-3 py-1.5 text-xs font-semibold bg-background/90 backdrop-blur-sm rounded-full text-foreground">
-                                                            {car.type}
-                                                        </span>
+                            {cars.length > 0 ? (
+                                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                                    {cars.map((car, index) => (
+                                        <motion.div
+                                            key={car.id}
+                                            initial={{ opacity: 0, y: 20 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: index * 0.05 }}
+                                        >
+                                            <Card className="group overflow-hidden rounded-2xl border-border hover:shadow-xl hover:shadow-secondary/5 transition-all duration-300">
+                                                <Link href={`/cars/${car.id}`}>
+                                                    <div className="relative aspect-[4/3] overflow-hidden cursor-pointer">
+                                                        <img
+                                                            src={car.image}
+                                                            alt={car.name}
+                                                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                                        />
+                                                        <div className="absolute top-4 left-4">
+                                                            <span className="px-3 py-1.5 text-xs font-semibold bg-background/90 backdrop-blur-sm rounded-full text-foreground">
+                                                                {car.type}
+                                                            </span>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </Link>
+                                                </Link>
 
-                                            <div className="p-5">
-                                                <div className="mb-3">
-                                                    <p className="text-xs font-medium text-secondary uppercase tracking-wider mb-1">
-                                                        {car.brand}
-                                                    </p>
-                                                    <Link href={`/cars/${car.id}`}>
-                                                        <h3 className="text-lg font-bold text-foreground group-hover:text-secondary transition-colors cursor-pointer">
-                                                            {car.name}
-                                                        </h3>
-                                                    </Link>
-                                                </div>
-
-                                                <div className="flex items-center gap-4 py-4 border-y border-border">
-                                                    <div className="flex items-center gap-1.5 text-muted-foreground">
-                                                        <Users className="w-4 h-4" />
-                                                        <span className="text-xs">{car.seats}</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-1.5 text-muted-foreground">
-                                                        <Gauge className="w-4 h-4" />
-                                                        <span className="text-xs">{car.transmission}</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-1.5 text-muted-foreground">
-                                                        <Fuel className="w-4 h-4" />
-                                                        <span className="text-xs">{car.fuel}</span>
-                                                    </div>
-                                                </div>
-
-                                                <div className="flex items-center justify-between pt-4">
-                                                    <div>
-                                                        <p className="text-2xl font-bold text-foreground">
-                                                            €{car.price}
-                                                            <span className="text-sm font-normal text-muted-foreground">/day</span>
+                                                <div className="p-5">
+                                                    <div className="mb-3">
+                                                        <p className="text-xs font-medium text-secondary uppercase tracking-wider mb-1">
+                                                            {car.brand}
                                                         </p>
+                                                        <Link href={`/cars/${car.id}`}>
+                                                            <h3 className="text-lg font-bold text-foreground group-hover:text-secondary transition-colors cursor-pointer">
+                                                                {car.name}
+                                                            </h3>
+                                                        </Link>
                                                     </div>
-                                                    <Link href={`/cars/${car.id}`}>
-                                                        <Button className="h-10 px-4 rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/90">
-                                                            View Details
-                                                        </Button>
-                                                    </Link>
-                                                </div>
 
-                                                <div className="grid grid-cols-2 gap-3 mt-4">
-                                                    <Button
-                                                        variant="outline"
-                                                        className="h-11 rounded-lg border-border gap-2"
-                                                    >
-                                                        <Phone className="w-4 h-4" /> Call
-                                                    </Button>
-                                                    <Button
-                                                        className="h-11 rounded-lg bg-green-600 hover:bg-green-700 text-white gap-2"
-                                                    >
-                                                        <FaWhatsapp className="w-4 h-4" /> WhatsApp
-                                                    </Button>
+                                                    <div className="flex items-center gap-4 py-4 border-y border-border">
+                                                        <div className="flex items-center gap-1.5 text-muted-foreground">
+                                                            <Users className="w-4 h-4" />
+                                                            <span className="text-xs">{car.seats}</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-1.5 text-muted-foreground">
+                                                            <Gauge className="w-4 h-4" />
+                                                            <span className="text-xs">{car.transmission}</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-1.5 text-muted-foreground">
+                                                            <Fuel className="w-4 h-4" />
+                                                            <span className="text-xs">{car.fuel}</span>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="flex items-center justify-between pt-4">
+                                                        <div>
+                                                            <p className="text-2xl font-bold text-foreground">
+                                                                €{car.price}
+                                                                <span className="text-sm font-normal text-muted-foreground">/day</span>
+                                                            </p>
+                                                        </div>
+                                                        <Link href={`/cars/${car.id}`}>
+                                                            <Button className="h-10 px-4 rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/90">
+                                                                View Details
+                                                            </Button>
+                                                        </Link>
+                                                    </div>
+
+                                                    <div className="grid grid-cols-2 gap-3 mt-4">
+                                                        <Button
+                                                            variant="outline"
+                                                            className="h-11 rounded-lg border-border gap-2"
+                                                        >
+                                                            <Phone className="w-4 h-4" /> Call
+                                                        </Button>
+                                                        <Button
+                                                            className="h-11 rounded-lg bg-green-600 hover:bg-green-700 text-white gap-2"
+                                                        >
+                                                            <FaWhatsapp className="w-4 h-4" /> WhatsApp
+                                                        </Button>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </Card>
-                                    </motion.div>
-                                ))}
-                            </div>
+                                            </Card>
+                                        </motion.div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    className="flex flex-col items-center justify-center py-24 bg-card rounded-3xl border border-dashed border-border"
+                                >
+                                    <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-6">
+                                        <Search className="w-8 h-8 text-muted-foreground" />
+                                    </div>
+                                    <h3 className="text-xl font-bold mb-2">No vehicles found</h3>
+                                    <p className="text-muted-foreground text-center max-w-md px-6">
+                                        We couldn't find any vehicles matching your current filters. Try adjusting your search or clearing some filters.
+                                    </p>
+                                    <Button
+                                        variant="link"
+                                        className="mt-4 text-secondary"
+                                        onClick={() => router.get('/cars')}
+                                    >
+                                        Clear all filters
+                                    </Button>
+                                </motion.div>
+                            )}
 
                             {/* Pagination */}
                             {pagination.last_page > 1 && (

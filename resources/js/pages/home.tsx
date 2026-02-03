@@ -42,6 +42,7 @@ interface Car {
 
 interface HomeProps {
     featuredCars: Car[];
+    locations: { id: number; name: string }[];
 }
 
 const experiences = [
@@ -119,11 +120,11 @@ const trustSignals = [
     },
 ];
 
-export default function Home({ featuredCars }: HomeProps) {
+export default function Home({ featuredCars, locations }: HomeProps) {
     return (
         <Layout>
             <Head title="MC Rental Cars - Premium Car Rentals" />
-            <Hero />
+            <Hero locations={locations} />
 
             {/* How It Works - New Conversion Section */}
             <section className="py-16 sm:py-20 lg:py-24 bg-gradient-to-b from-background to-muted/30 relative overflow-hidden">

@@ -17,6 +17,7 @@ class Car extends Model
 
     protected $fillable = [
         'car_category_id',
+        'location_id',
         'brand',
         'model',
         'year',
@@ -61,6 +62,14 @@ class Car extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(CarCategory::class, 'car_category_id');
+    }
+
+    /**
+     * The location this car belongs to.
+     */
+    public function location(): BelongsTo
+    {
+        return $this->belongsTo(Location::class);
     }
 
     /**

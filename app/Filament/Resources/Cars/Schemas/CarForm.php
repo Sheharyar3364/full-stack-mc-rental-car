@@ -48,6 +48,12 @@ class CarForm
                             ->default(5)
                             ->minValue(2)
                             ->maxValue(15),
+                        Select::make('location_id')
+                            ->label('Location')
+                            ->options(\App\Models\Location::query()->where('is_active', true)->pluck('name', 'id'))
+                            ->required()
+                            ->searchable()
+                            ->preload(),
                     ]),
 
                 Section::make('Registration & Identification')
@@ -107,20 +113,14 @@ class CarForm
                             ->reorderable()
                             ->maxFiles(10)
                             ->directory('cars')
-                            ->imageResizeMode('cover')
-                            ->imageCropAspectRatio('16:9')
-                            ->imageResizeTargetWidth('1920')
-                            ->imageResizeTargetHeight('1080')
+                            ->disk('public')
                             ->helperText('Upload up to 10 images. First image will be the main image.')
                             ->columnSpanFull(),
                         FileUpload::make('featured_image')
                             ->label('Featured Image (Homepage)')
                             ->image()
                             ->directory('cars/featured')
-                            ->imageResizeMode('cover')
-                            ->imageCropAspectRatio('16:9')
-                            ->imageResizeTargetWidth('1920')
-                            ->imageResizeTargetHeight('1080')
+                            ->disk('public')
                             ->helperText('Special image for homepage featured section')
                             ->columnSpanFull(),
                     ]),

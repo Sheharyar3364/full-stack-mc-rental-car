@@ -1,12 +1,25 @@
-import { useRef } from "react";
-import { Link } from "@inertiajs/react";
+import { useRef, useState } from "react";
+import { Link, router } from "@inertiajs/react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { MagneticButton } from "@/components/ui/magnetic-button";
 import { TextReveal, FadeUpReveal } from "@/components/ui/text-reveal";
 import { MapPin, Calendar, Clock, ArrowRight, Star, Sparkles } from "lucide-react";
 
-export function Hero() {
+export function Hero({ locations = [] }: { locations?: { id: number; name: string }[] }) {
+    const [locationId, setLocationId] = useState("");
+    const [pickupDate, setPickupDate] = useState("");
+    const [dropoffDate, setDropoffDate] = useState("");
+
     const containerRef = useRef<HTMLDivElement>(null);
+
+    const handleSearch = () => {
+        const params: any = {};
+        if (locationId) params.location_id = locationId;
+        if (pickupDate) params.pickup_date = pickupDate;
+        if (dropoffDate) params.dropoff_date = dropoffDate;
+
+        router.get("/cars", params);
+    };
     const { scrollY } = useScroll();
     const y = useTransform(scrollY, [0, 1000], [0, 400]);
     const opacity = useTransform(scrollY, [0, 600], [1, 0]);
@@ -138,11 +151,21 @@ export function Hero() {
                                             Location
                                         </label>
                                         <div className="relative group/input">
-                                            <input
-                                                type="text"
-                                                placeholder="City or Airport Code"
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-4 text-white text-sm placeholder:text-white/30 focus:bg-white/10 focus:border-secondary/50 focus:ring-2 focus:ring-secondary/20 transition-all duration-300 outline-none"
-                                            />
+                                            <select
+                                                value={locationId}
+                                                onChange={(e) => setLocationId(e.target.value)}
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-4 text-white text-sm placeholder:text-white/30 focus:bg-white/10 focus:border-secondary/50 focus:ring-2 focus:ring-secondary/20 transition-all duration-300 outline-none appearance-none cursor-pointer"
+                                            >
+                                                <option value="" className="bg-black text-white">Select Location</option>
+                                                {locations.map(loc => (
+                                                    <option key={loc.id} value={loc.id} className="bg-black text-white">
+                                                        {loc.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none">
+                                                <ArrowRight className="w-4 h-4 text-white/30 rotate-90" />
+                                            </div>
                                             <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-secondary/0 via-secondary/5 to-secondary/0 opacity-0 group-hover/input:opacity-100 transition-opacity pointer-events-none" />
                                         </div>
                                     </div>
@@ -151,40 +174,45 @@ export function Hero() {
                                         <div className="space-y-3">
                                             <label className="text-[10px] uppercase tracking-[0.2em] text-white/50 font-semibold flex items-center gap-2">
                                                 <Calendar className="w-3 h-3" />
-                                                Date
+                                                Pickup Date
                                             </label>
-                                            <div className="relative group/input">
+                                            <div className="relative group/input text-white/30">
                                                 <input
-                                                    type="text"
-                                                    placeholder="Select"
-                                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-4 text-white text-sm placeholder:text-white/30 focus:bg-white/10 focus:border-secondary/50 focus:ring-2 focus:ring-secondary/20 transition-all duration-300 outline-none"
+                                                    type="date"
+                                                    value={pickupDate}
+                                                    onChange={(e) => setPickupDate(e.target.value)}
+                                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-4 text-white text-sm placeholder:text-white/30 focus:bg-white/10 focus:border-secondary/50 focus:ring-2 focus:ring-secondary/20 transition-all duration-300 outline-none [color-scheme:dark]"
                                                 />
                                                 <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-secondary/0 via-secondary/5 to-secondary/0 opacity-0 group-hover/input:opacity-100 transition-opacity pointer-events-none" />
                                             </div>
                                         </div>
                                         <div className="space-y-3">
                                             <label className="text-[10px] uppercase tracking-[0.2em] text-white/50 font-semibold flex items-center gap-2">
-                                                <Clock className="w-3 h-3" />
-                                                Time
+                                                <Calendar className="w-3 h-3" />
+                                                Drop-off
                                             </label>
                                             <div className="relative group/input">
                                                 <input
-                                                    type="text"
-                                                    placeholder="10:00 AM"
-                                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-4 text-white text-sm placeholder:text-white/30 focus:bg-white/10 focus:border-secondary/50 focus:ring-2 focus:ring-secondary/20 transition-all duration-300 outline-none"
+                                                    type="date"
+                                                    value={dropoffDate}
+                                                    onChange={(e) => setDropoffDate(e.target.value)}
+                                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-4 text-white text-sm placeholder:text-white/30 focus:bg-white/10 focus:border-secondary/50 focus:ring-2 focus:ring-secondary/20 transition-all duration-300 outline-none [color-scheme:dark]"
                                                 />
                                                 <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-secondary/0 via-secondary/5 to-secondary/0 opacity-0 group-hover/input:opacity-100 transition-opacity pointer-events-none" />
                                             </div>
                                         </div>
                                     </div>
 
-                                    <Link href="/cars" className="block mt-8">
-                                        <button className="relative w-full h-16 bg-gradient-to-r from-secondary to-blue-600 hover:from-secondary/90 hover:to-blue-600/90 text-white font-black uppercase tracking-[0.25em] text-sm transition-all duration-300 flex items-center justify-center gap-3 group overflow-hidden shadow-lg shadow-secondary/30 hover:shadow-secondary/50 hover:scale-[1.02] active:scale-[0.98] rounded-xl">
+                                    <div className="block mt-8">
+                                        <button
+                                            onClick={handleSearch}
+                                            className="relative w-full h-16 bg-gradient-to-r from-secondary to-blue-600 hover:from-secondary/90 hover:to-blue-600/90 text-white font-black uppercase tracking-[0.25em] text-sm transition-all duration-300 flex items-center justify-center gap-3 group overflow-hidden shadow-lg shadow-secondary/30 hover:shadow-secondary/50 hover:scale-[1.02] active:scale-[0.98] rounded-xl"
+                                        >
                                             <span className="relative z-10">Search Availability</span>
                                             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform relative z-10" />
                                             <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
                                         </button>
-                                    </Link>
+                                    </div>
                                 </div>
                             </div>
                         </div>

@@ -15,7 +15,7 @@ class CarController extends Controller
      */
     public function index(): Response
     {
-        $query = Car::with('category')
+        $query = Car::with(['category', 'location'])
             ->where('is_active', true)
             ->where('status', CarStatus::Available);
 
@@ -40,6 +40,11 @@ class CarController extends Controller
             $query->whereIn('car_category_id', $categories);
         }
 
+        // Location filter
+        if (request('location_id')) {
+            $query->where('location_id', request('location_id'));
+        }
+
         // Price range filter
         if (request('min_price')) {
             $query->where(function ($q) {
@@ -58,6 +63,24 @@ class CarController extends Controller
                     ->orWhereHas('category', function ($cq) use ($maxPrice) {
                         $cq->where('daily_rate', '<=', $maxPrice);
                     });
+            });
+        }
+
+        // Availability filter (Dates)
+        if (request('pickup_date') && request('dropoff_date')) {
+            $start = request('pickup_date');
+            $end = request('dropoff_date');
+            
+            $query->whereDoesntHave('bookings', function ($q) use ($start, $end) {
+                $q->whereIn('status', ['pending', 'confirmed', 'active'])
+                  ->where(function ($sub) use ($start, $end) {
+                      $sub->whereBetween('pickup_date', [$start, $end])
+                          ->orWhereBetween('dropoff_date', [$start, $end])
+                          ->orWhere(function ($q2) use ($start, $end) {
+                              $q2->where('pickup_date', '<=', $start)
+                                 ->where('dropoff_date', '>=', $end);
+                          });
+                  });
             });
         }
 
@@ -90,6 +113,13 @@ class CarController extends Controller
             ->sort()
             ->values();
 
+        $allLocations = \App\Models\Location::where('is_active', true)
+            ->get()
+            ->map(fn($loc) => [
+                'id' => $loc->id,
+                'name' => $loc->name,
+            ]);
+
         return Inertia::render('cars/index', [
             'cars' => $cars->items(),
             'pagination' => [
@@ -102,12 +132,16 @@ class CarController extends Controller
             ],
             'categories' => $allCategories,
             'brands' => $allBrands,
+            'locations' => $allLocations,
             'filters' => [
                 'search' => request('search'),
                 'brands' => request('brands', []),
                 'categories' => request('categories', []),
                 'min_price' => request('min_price'),
                 'max_price' => request('max_price'),
+                'pickup_date' => request('pickup_date'),
+                'dropoff_date' => request('dropoff_date'),
+                'location_id' => request('location_id'),
                 'sort' => request('sort', 'featured'),
             ],
         ]);
@@ -160,17 +194,32 @@ class CarController extends Controller
      */
     private function transformCar(Car $car, bool $detailed = false): array
     {
+        // Handle image path
+        $imagePath = $car->image;
+        if (empty($imagePath) && !empty($car->images)) {
+            $imagePath = is_array($car->images) ? $car->images[0] : null;
+        }
+
+        if (empty($imagePath)) {
+            $image = 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=800';
+        } elseif (str_starts_with($imagePath, 'http')) {
+            $image = $imagePath;
+        } else {
+            $image = asset('storage/' . $imagePath);
+        }
+
         $data = [
             'id' => $car->id,
             'name' => "{$car->year} {$car->brand} {$car->model}",
             'brand' => $car->brand,
             'type' => $car->category?->name ?? 'Luxury',
             'year' => $car->year,
-            'image' => $car->image ?? 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=800',
-            'price' => $car->daily_rate ?? $car->category?->daily_rate ?? 450,
+            'image' => $image,
+            'price' => (float) ($car->daily_rate ?? $car->category?->daily_rate ?? 450),
             'seats' => $car->seats,
-            'fuel' => $car->fuel_type?->value ?? 'Petrol',
-            'transmission' => $car->transmission?->value ?? 'Automatic',
+            'fuel' => $car->fuel_type?->getLabel() ?? $car->fuel_type?->value ?? 'Petrol',
+            'transmission' => $car->transmission?->getLabel() ?? $car->transmission?->value ?? 'Automatic',
+            'location' => $car->location?->name,
         ];
 
         if ($detailed) {
@@ -188,9 +237,9 @@ class CarController extends Controller
                     'Premium Sound System',
                     'Wireless Charging',
                 ],
-                'images' => $car->images ?? [
-                    $car->image ?? 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=1600',
-                ],
+                'images' => !empty($car->images) 
+                    ? array_map(fn($img) => str_starts_with($img, 'http') ? $img : asset('storage/' . $img), $car->images)
+                    : [$image],
             ]);
         }
 

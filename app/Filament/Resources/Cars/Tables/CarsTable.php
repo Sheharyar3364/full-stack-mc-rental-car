@@ -33,6 +33,10 @@ class CarsTable
                     ->sortable(),
                 TextColumn::make('model')
                     ->searchable(),
+                TextColumn::make('location.name')
+                    ->label('Location')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('year')
                     ->numeric()
                     ->sortable(),

@@ -75,6 +75,7 @@ class CarFactory extends Factory
             'status' => CarStatus::Available,
             'is_active' => true,
             'image' => $this->faker->randomElement($carImages),
+            'location_id' => \App\Models\Location::inRandomOrder()->first()?->id ?? \App\Models\Location::factory(),
         ];
     }
 
