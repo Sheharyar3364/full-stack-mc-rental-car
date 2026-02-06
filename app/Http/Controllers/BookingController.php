@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
 use Stripe\Stripe;
 use Stripe\Checkout\Session as StripeSession;
+use Filament\Notifications\Notification;
+use Filament\Actions\Action;
 
 class BookingController extends Controller
 {
@@ -47,17 +49,7 @@ class BookingController extends Controller
                 'phone' => $location->phone,
             ]);
 
-        // Check if user is authenticated
-        $user = auth()->user();
-        $authData = $user ? [
-            'isAuthenticated' => true,
-            'name' => $user->name,
-            'email' => $user->email,
-        ] : [
-            'isAuthenticated' => false,
-            'name' => null,
-            'email' => null,
-        ];
+
 
         // Get booked dates for this car (pending and confirmed bookings)
         $bookedDates = $car->bookings()
@@ -76,7 +68,6 @@ class BookingController extends Controller
         return Inertia::render('bookings/create', [
             'car' => $this->transformCar($car),
             'locations' => $locations,
-            'auth' => $authData,
             'bookedDates' => $bookedDates,
         ]);
     }
@@ -117,29 +108,41 @@ class BookingController extends Controller
 
         // Calculate pricing
         $days = $pickupDate->diff($dropoffDate)->days + 1;
-        $dailyRate = $car->daily_rate ?? $car->category->daily_rate;
+        $dailyRate = $car->daily_rate ?? $car->category?->daily_rate ?? 500;
         $subtotal = $dailyRate * $days;
-        $taxRate = 0.10; // 10% tax
-        $taxAmount = $subtotal * $taxRate;
+        $taxAmount = $subtotal * 0.10; // 10% Tax
         $totalAmount = $subtotal + $taxAmount;
-        $depositAmount = $totalAmount * 0.30; // 30% deposit
+        $depositAmount = $totalAmount * 0.30; // 30% Deposit
 
-        // Create or find customer
+        // Ensure user is authenticated
+        $user = auth()->user();
+        
+        if (!$user) {
+            return redirect()->route('login');
+        }
+        
+        // Handle Customer Creation / Retrieval
         $customer = Customer::firstOrCreate(
-            ['email' => $request->email],
+            ['email' => $user->email],
             [
+                'user_id' => $user->id,
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
                 'phone' => $request->phone,
                 'drivers_license_number' => $request->drivers_license_number,
             ]
         );
+        
+        // Ensure customer is linked to user
+        if (!$customer->user_id) {
+            $customer->update(['user_id' => $user->id]);
+        }
 
-        // Create booking with optional user_id for authenticated users
+        // Create booking
         $booking = Booking::create([
             'customer_id' => $customer->id,
             'car_id' => $car->id,
-            'user_id' => auth()->id(), // Will be null for guests
+            'user_id' => $user->id,
             'pickup_location_id' => $request->pickup_location_id,
             'dropoff_location_id' => $request->dropoff_location_id,
             'pickup_date' => $request->pickup_date,
@@ -152,6 +155,25 @@ class BookingController extends Controller
             'deposit_amount' => $depositAmount,
             'status' => BookingStatus::Pending,
         ]);
+
+        // Notify Admins
+        try {
+            $admins = \App\Models\User::all();
+            
+            foreach ($admins as $admin) {
+                Notification::make()
+                    ->title('New Booking Created')
+                    ->body("New booking #{$booking->booking_number} by {$customer->first_name} {$customer->last_name}")
+                    ->actions([
+                        Action::make('view')
+                            ->button()
+                            ->url("/admin/bookings/{$booking->id}/edit"),
+                    ])
+                    ->sendToDatabase($admin);
+            }
+        } catch (\Exception $e) {
+            \Log::error('Failed to send admin notification for booking: ' . $e->getMessage());
+        }
 
         // Redirect to payment page
         return redirect()->route('bookings.payment', $booking);
@@ -364,6 +386,7 @@ class BookingController extends Controller
                 'name' => $booking->customer->full_name,
                 'email' => $booking->customer->email,
                 'phone' => $booking->customer->phone,
+                'verification_status' => $booking->customer->verification_status,
             ],
             'pickup_date' => $booking->pickup_date->format('Y-m-d H:i'),
             'dropoff_date' => $booking->dropoff_date->format('Y-m-d H:i'),

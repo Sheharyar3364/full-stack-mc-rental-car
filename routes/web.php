@@ -83,7 +83,13 @@ Route::middleware([
     Route::get('/account', [App\Http\Controllers\AccountController::class, 'dashboard'])->name('account.dashboard');
     Route::get('/account/bookings', [App\Http\Controllers\AccountController::class, 'bookings'])->name('account.bookings');
     Route::get('/account/bookings/{booking}', [App\Http\Controllers\AccountController::class, 'showBooking'])->name('account.bookings.show');
+    
+    // Document Verification
+    Route::get('/account/verification', [App\Http\Controllers\CustomerDocumentController::class, 'index'])->name('account.verification');
+    Route::post('/account/verification', [App\Http\Controllers\CustomerDocumentController::class, 'store'])->name('account.verification.store');
 });
 
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';
+
+

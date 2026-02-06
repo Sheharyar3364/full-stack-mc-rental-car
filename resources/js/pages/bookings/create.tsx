@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Head, Link, useForm, router } from "@inertiajs/react";
+import { Head, Link, useForm, router, usePage } from "@inertiajs/react";
+import { SharedData } from "@/types";
 import { Layout } from "@/components/frontend/layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,16 +46,20 @@ interface BookedDateRange {
 interface BookingCreateProps {
     car: CarData;
     locations: LocationData[];
-    auth?: AuthData;
-    errors?: Record<string, string>;
+    // auth prop is no longer passed from controller, but allow it optionally or remove
     bookedDates?: BookedDateRange[];
 }
 
-export default function BookingCreate({ car, locations, auth, bookedDates = [] }: BookingCreateProps) {
+export default function BookingCreate({ car, locations, bookedDates = [] }: BookingCreateProps) {
+    const { auth } = usePage<SharedData>().props;
+    const user = auth.user;
+
+    console.log('BookingCreate Auth Debug:', { auth, user });
+
     const [isChecking, setIsChecking] = useState(false);
     const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
-    const [showAuthChoice, setShowAuthChoice] = useState(!auth?.isAuthenticated);
-    const [guestCheckout, setGuestCheckout] = useState(false);
+
+    const [showAuthChoice, setShowAuthChoice] = useState(!user);
     const [pricing, setPricing] = useState({
         days: 0,
         subtotal: 0,
@@ -66,9 +71,9 @@ export default function BookingCreate({ car, locations, auth, bookedDates = [] }
     const [dropoffOpen, setDropoffOpen] = useState(false);
 
     // Parse name for authenticated users
-    const nameParts = auth?.name?.split(' ') || [];
-    const defaultFirstName = auth?.isAuthenticated ? nameParts[0] || '' : '';
-    const defaultLastName = auth?.isAuthenticated ? nameParts.slice(1).join(' ') || '' : '';
+    const nameParts = user?.name?.split(' ') || [];
+    const defaultFirstName = user ? nameParts[0] || '' : '';
+    const defaultLastName = user ? nameParts.slice(1).join(' ') || '' : '';
 
     const { data, setData, post, processing, errors } = useForm({
         car_id: car.id,
@@ -78,22 +83,22 @@ export default function BookingCreate({ car, locations, auth, bookedDates = [] }
         dropoff_location_id: "",
         first_name: defaultFirstName,
         last_name: defaultLastName,
-        email: auth?.email || "",
+        email: user?.email || "",
         phone: "",
         drivers_license_number: "",
     });
 
     // Handle auth state changes (e.g. if user logs in via a modal or different tab)
     useEffect(() => {
-        if (auth?.isAuthenticated) {
+        if (user) {
             setData((d) => ({
                 ...d,
                 first_name: defaultFirstName,
                 last_name: defaultLastName,
-                email: auth?.email || d.email,
+                email: user.email || d.email,
             }));
         }
-    }, [auth]);
+    }, [user]);
 
     // Calculate pricing when dates change
     useEffect(() => {
@@ -186,51 +191,38 @@ export default function BookingCreate({ car, locations, auth, bookedDates = [] }
                         <div className="lg:col-span-2 space-y-6">
                             {/* Auth Choice Card for Guests */}
                             <AnimatePresence>
-                                {showAuthChoice && !guestCheckout && (
+                                {!user && (
                                     <motion.div
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, y: -20 }}
-                                        className="bg-card border border-border rounded-2xl p-6"
+                                        className="bg-card border border-border rounded-2xl p-6 mb-8"
                                     >
                                         <div className="flex items-center gap-3 mb-4">
                                             <User className="w-6 h-6 text-secondary" />
-                                            <h2 className="text-xl font-bold">How would you like to proceed?</h2>
+                                            <h2 className="text-xl font-bold">Account Required</h2>
                                         </div>
                                         <p className="text-muted-foreground mb-6">
-                                            Login to save your booking history and easily manage future rentals, or continue as a guest.
+                                            To ensure the security of our luxury fleet, we require all drivers to have a verified account.
                                         </p>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="grid grid-cols-1 gap-4">
                                             <Button
                                                 type="button"
                                                 variant="outline"
-                                                className="h-16 flex flex-col items-center justify-center gap-1"
-                                                onClick={() => router.visit(`/login?redirect=${encodeURIComponent(window.location.href)}`)}
+                                                className="h-16 flex flex-col items-center justify-center gap-1 bg-secondary/10 hover:bg-secondary/20 border-secondary/20"
+                                                onClick={() => router.visit('/login')}
                                             >
-                                                <LogIn className="w-5 h-5" />
-                                                <span className="font-bold">Login to Account</span>
-                                                <span className="text-xs text-muted-foreground">Save booking to your profile</span>
-                                            </Button>
-                                            <Button
-                                                type="button"
-                                                variant="default"
-                                                className="h-16 flex flex-col items-center justify-center gap-1 bg-secondary hover:bg-secondary/90"
-                                                onClick={() => {
-                                                    setShowAuthChoice(false);
-                                                    setGuestCheckout(true);
-                                                }}
-                                            >
-                                                <UserPlus className="w-5 h-5" />
-                                                <span className="font-bold">Continue as Guest</span>
-                                                <span className="text-xs text-white/70">No account needed</span>
+                                                <LogIn className="w-5 h-5 text-secondary" />
+                                                <span className="font-bold text-secondary">Login or Create Account</span>
+                                                <span className="text-xs text-muted-foreground">Continue to secure booking</span>
                                             </Button>
                                         </div>
                                     </motion.div>
                                 )}
                             </AnimatePresence>
 
-                            {/* Show form sections only after choice is made or if authenticated */}
-                            {(auth?.isAuthenticated || guestCheckout) && (
+                            {/* Show form sections only if authenticated */}
+                            {user && (
                                 <>
                                     {/* Dates Section */}
                                     <motion.div

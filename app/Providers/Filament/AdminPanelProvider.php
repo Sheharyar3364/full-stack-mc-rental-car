@@ -46,6 +46,7 @@ class AdminPanelProvider extends PanelProvider
             ->favicon(asset('logo.png'))
             ->sidebarCollapsibleOnDesktop()
             // ->brandLogo('/images/logo.png')
+            ->databaseNotifications()
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,

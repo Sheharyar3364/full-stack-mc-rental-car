@@ -12,7 +12,7 @@ use Illuminate\Notifications\Notifiable;
 class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, \Illuminate\Notifications\HasDatabaseNotifications;
 
     /**
      * The attributes that are mass assignable.
@@ -65,5 +65,21 @@ class User extends Authenticatable implements FilamentUser
     public function bookings(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Booking::class);
+    }
+
+    /**
+     * Get the customer record associated with the user.
+     */
+    public function customer(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Customer::class);
+    }
+
+    /**
+     * Check if the user's customer profile is verified.
+     */
+    public function isVerified(): bool
+    {
+        return $this->customer?->isVerified() ?? false;
     }
 }

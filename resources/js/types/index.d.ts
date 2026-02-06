@@ -38,5 +38,7 @@ export interface User {
     email_verified_at: string | null;
     created_at: string;
     updated_at: string;
+    verification_status?: 'unverified' | 'pending' | 'verified' | 'rejected';
+    is_verified?: boolean;
     [key: string]: unknown; // This allows for additional properties...
 }

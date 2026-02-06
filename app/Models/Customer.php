@@ -12,6 +12,7 @@ class Customer extends Model
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
         'first_name',
         'last_name',
         'email',
@@ -25,6 +26,8 @@ class Customer extends Model
         'postal_code',
         'country',
         'is_blacklisted',
+        'verification_status',
+        'verification_notes',
         'notes',
     ];
 
@@ -41,11 +44,38 @@ class Customer extends Model
     }
 
     /**
+     * Check if the customer is verified.
+     */
+    public function isVerified(): bool
+    {
+        return $this->verification_status === 'verified';
+    }
+
+    /**
+     * Customer's bookings.
+     */
+    /**
      * Customer's bookings.
      */
     public function bookings(): HasMany
     {
         return $this->hasMany(Booking::class);
+    }
+
+    /**
+     * Get the user that owns the customer record.
+     */
+    public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Customer's documents.
+     */
+    public function documents(): HasMany
+    {
+        return $this->hasMany(CustomerDocument::class);
     }
 
     /**

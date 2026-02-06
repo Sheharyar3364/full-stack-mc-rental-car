@@ -73,10 +73,24 @@ class CustomerForm
                         Toggle::make('is_blacklisted')
                             ->label('Blacklisted')
                             ->helperText('Blacklisted customers cannot make new bookings'),
+                        \Filament\Forms\Components\Select::make('verification_status')
+                            ->label('Verification Status')
+                            ->options([
+                                'unverified' => 'Unverified',
+                                'pending' => 'Pending Review',
+                                'verified' => 'Verified',
+                                'rejected' => 'Rejected',
+                            ])
+                            ->required()
+                            ->default('unverified'),
                         Textarea::make('notes')
                             ->label('Internal Notes')
                             ->rows(3)
                             ->placeholder('Admin notes about this customer...'),
+                        Textarea::make('verification_notes')
+                            ->label('Verification Reason/Notes')
+                            ->rows(2)
+                            ->placeholder('Notes shared with user about verification...'),
                     ]),
             ]);
     }

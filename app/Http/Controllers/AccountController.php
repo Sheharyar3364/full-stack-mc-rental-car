@@ -35,6 +35,7 @@ class AccountController extends Controller
             'user' => [
                 'name' => $user->name,
                 'email' => $user->email,
+                'verification_status' => $user->customer?->verification_status ?? 'unverified',
             ],
             'stats' => $stats,
             'recentBookings' => $recentBookings,

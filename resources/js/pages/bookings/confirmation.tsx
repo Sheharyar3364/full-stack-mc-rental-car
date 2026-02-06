@@ -1,7 +1,8 @@
-import { Head, Link } from "@inertiajs/react";
+import { Head, Link, usePage } from "@inertiajs/react";
+import { SharedData } from "@/types";
 import { Layout } from "@/components/frontend/layout";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Calendar, MapPin, User, CreditCard, Car, Mail, Phone } from "lucide-react";
+import { CheckCircle2, Calendar, MapPin, User, CreditCard, Car, Mail, Phone, AlertTriangle, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { confetti } from "@/lib/confetti";
 import { useEffect } from "react";
@@ -20,6 +21,7 @@ interface BookingData {
         name: string;
         email: string;
         phone: string;
+        verification_status: string;
     };
     pickup_date: string;
     dropoff_date: string;
@@ -45,8 +47,49 @@ interface ConfirmationProps {
     booking: BookingData;
 }
 
+function VerificationWarning() {
+    const { auth } = usePage<SharedData>().props;
+    const user = auth.user;
+
+
+    if (user?.verification_status === 'verified') return null;
+
+
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="mb-8 border-2 border-red-500/20 bg-red-500/5 rounded-2xl p-6 md:p-8"
+        >
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+                <div className="bg-red-100 text-red-600 rounded-2xl p-4 shrink-0">
+                    <AlertTriangle className="w-8 h-8" />
+                </div>
+                <div className="flex-1">
+
+                    <h2 className="text-xl font-bold text-red-900 dark:text-red-400 mb-2">
+                        Action Required: Verify Your Identity
+                    </h2>
+                    <p className="text-muted-foreground mb-4 max-w-xl">
+                        To comply with our insurance policy and release the vehicle, we require a valid driver's license and ID. This process takes less than 2 minutes.
+                    </p>
+                    <Link href="/account/verification">
+                        <Button size="lg" className="bg-red-600 hover:bg-red-700 text-white font-bold shadow-lg shadow-red-500/20">
+                            Complete Verification <ArrowRight className="w-4 h-4 ml-2" />
+                        </Button>
+                    </Link>
+                </div>
+            </div>
+        </motion.div>
+    );
+}
+
 export default function Confirmation({ booking }: ConfirmationProps) {
     const isPaid = booking.status === 'confirmed' || booking.total_paid > 0;
+    const { auth } = usePage<SharedData>().props;
+
+    const user = auth.user;
 
     useEffect(() => {
         // Trigger confetti on successful booking
@@ -103,6 +146,10 @@ export default function Confirmation({ booking }: ConfirmationProps) {
                             Please save this number for your records
                         </p>
                     </motion.div>
+
+                    {/* Verification Required Warning - Inserted Here */}
+                    {/* Access auth via usePage inside component or assume specific logic. Better to use usePage. */}
+                    <VerificationWarning />
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         {/* Booking Details */}
@@ -275,20 +322,29 @@ export default function Confirmation({ booking }: ConfirmationProps) {
                                             </p>
                                         </div>
                                     )}
-                                </div>
 
-                                {/* Action Buttons */}
-                                <div className="space-y-3 mt-6">
-                                    <Link href="/cars">
-                                        <Button className="w-full" variant="default">
-                                            Browse More Cars
-                                        </Button>
-                                    </Link>
-                                    <Link href="/contact">
-                                        <Button className="w-full" variant="outline">
-                                            Contact Support
-                                        </Button>
-                                    </Link>
+                                    {/* Action Buttons */}
+                                    <div className="space-y-3 mt-6">
+                                        <Link href="/cars">
+                                            <Button className="w-full" variant="default">
+                                                Browse More Cars
+                                            </Button>
+                                        </Link>
+                                        <Link href="/contact">
+                                            <Button className="w-full" variant="outline">
+                                                Contact Support
+                                            </Button>
+                                        </Link>
+                                    </div>
+                                    {
+                                        user?.verification_status !== 'verified' && (
+                                            <Link href="/account/verification">
+                                                <Button size="lg" className="bg-white text-blue-600 hover:bg-white/90 font-bold shadow-lg">
+                                                    Verify Now →
+                                                </Button>
+                                            </Link>
+                                        )
+                                    }
                                 </div>
                             </motion.div>
                         </div>

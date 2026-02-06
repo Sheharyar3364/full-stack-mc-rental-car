@@ -34,6 +34,7 @@ class CustomerResource extends Resource
     {
         return [
             \App\Filament\Resources\Customers\RelationManagers\BookingsRelationManager::class,
+            \App\Filament\Resources\Customers\RelationManagers\DocumentsRelationManager::class,
         ];
     }
 
