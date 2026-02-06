@@ -42,6 +42,15 @@ class CustomersTable
                     ->searchable(),
                 IconColumn::make('is_blacklisted')
                     ->boolean(),
+                TextColumn::make('verification_status')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'verified' => 'success',
+                        'pending' => 'warning',
+                        'rejected' => 'danger',
+                        'unverified' => 'gray',
+                        default => 'gray',
+                    }),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -52,7 +61,13 @@ class CustomersTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                \Filament\Tables\Filters\SelectFilter::make('verification_status')
+                    ->options([
+                        'unverified' => 'Unverified',
+                        'pending' => 'Pending Review',
+                        'verified' => 'Verified',
+                        'rejected' => 'Rejected',
+                    ]),
             ])
             ->recordActions([
                 EditAction::make(),

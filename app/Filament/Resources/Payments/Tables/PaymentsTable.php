@@ -14,7 +14,8 @@ class PaymentsTable
     {
         return $table
             ->columns([
-                TextColumn::make('booking.id')
+                TextColumn::make('booking.booking_number')
+                    ->label('Booking No.')
                     ->searchable(),
                 TextColumn::make('amount')
                     ->money('EUR')
@@ -26,7 +27,8 @@ class PaymentsTable
                     ->badge()
                     ->searchable(),
                 TextColumn::make('transaction_id')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('status')
                     ->badge()
                     ->searchable(),
@@ -35,13 +37,13 @@ class PaymentsTable
                     ->sortable(),
                 TextColumn::make('created_at')
                     ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->sortable(),
                 TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->defaultSort('created_at', 'desc')
             ->filters([
                 //
             ])
