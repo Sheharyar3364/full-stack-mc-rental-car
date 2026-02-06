@@ -19,7 +19,7 @@ class ContactFormMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'New Contact Form Submission - MC Rental Cars',
+            subject: 'New Contact Form Submission - MCRENTALCARS',
             to: [config('mail.contact_email', env('CONTACT_EMAIL'))],
             replyTo: [$this->contactData['email']],
         );

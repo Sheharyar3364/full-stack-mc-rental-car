@@ -68,7 +68,7 @@ export default function Gallery() {
 
     return (
         <Layout>
-            <Head title="Premium Gallery - MC Rental Cars" />
+            <Head title="Premium Gallery - MCRENTALCARS" />
 
             <div className="relative min-h-screen bg-black">
                 {/* Parallax Hero Background */}

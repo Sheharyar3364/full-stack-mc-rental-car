@@ -1,25 +1,14 @@
-import { useState } from "react";
-import { Head, Link } from "@inertiajs/react";
-import { Layout } from "@/components/frontend/layout";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CompareButton } from "@/components/ui/compare-mode";
-import { AvailabilityCalendar } from "@/components/ui/availability-calendar";
-import { FadeUpReveal, TextReveal } from "@/components/ui/text-reveal";
-import { MagneticButton } from "@/components/ui/magnetic-button";
-import {
-    Users,
-    Fuel,
-    Settings,
-    Phone,
-    Shield,
-    Check,
-    ChevronLeft,
-    ChevronRight,
-    Heart,
-    Sparkles,
-} from "lucide-react";
-import { FaWhatsapp } from "react-icons/fa";
+import { Layout } from '@/components/frontend/layout';
+import { AvailabilityCalendar } from '@/components/ui/availability-calendar';
+import { Button } from '@/components/ui/button';
+import { CompareButton } from '@/components/ui/compare-mode';
+import { MagneticButton } from '@/components/ui/magnetic-button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { FadeUpReveal, TextReveal } from '@/components/ui/text-reveal';
+import { Head, Link } from '@inertiajs/react';
+import { Check, ChevronLeft, ChevronRight, Fuel, Heart, Phone, Settings, Shield, Sparkles, Users } from 'lucide-react';
+import { useState } from 'react';
+import { FaWhatsapp } from 'react-icons/fa';
 
 interface CarData {
     id: number;
@@ -57,60 +46,59 @@ export default function CarShow({ car, relatedCars, bookedDates = [] }: CarShowP
     const [wishlisted, setWishlisted] = useState(false);
 
     // Use car images or fallback to default
-    const displayImages = car.images && car.images.length > 0
-        ? car.images
-        : [
-            car.image,
-            "https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=1600",
-            "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1600",
-        ];
+    const displayImages =
+        car.images && car.images.length > 0
+            ? car.images
+            : [
+                  car.image,
+                  'https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=1600',
+                  'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1600',
+              ];
 
     return (
         <Layout>
-            <Head title={`${car.name} - MC Rental Cars`} />
-            <div className="bg-background min-h-screen text-foreground">
+            <Head title={`${car.name} - MCRENTALCARS`} />
+            <div className="min-h-screen bg-background text-foreground">
                 {/* Hero Section with Gallery */}
                 <div className="relative bg-black">
-                    <div className="max-w-[1440px] mx-auto px-6 pt-24 pb-12">
+                    <div className="mx-auto max-w-[1440px] px-6 pt-24 pb-12">
                         {/* Breadcrumb */}
-                        <nav className="flex items-center gap-2 text-xs uppercase tracking-widest text-white/50 mb-8">
-                            <Link href="/" className="hover:text-white transition-colors">
+                        <nav className="mb-8 flex items-center gap-2 text-xs tracking-widest text-white/50 uppercase">
+                            <Link href="/" className="transition-colors hover:text-white">
                                 Home
                             </Link>
                             <span>/</span>
-                            <Link href="/cars" className="hover:text-white transition-colors">
+                            <Link href="/cars" className="transition-colors hover:text-white">
                                 Fleet
                             </Link>
                             <span>/</span>
-                            <span className="text-white font-bold">{car.name}</span>
+                            <span className="font-bold text-white">{car.name}</span>
                         </nav>
 
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+                        <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-2">
                             {/* Left: Title & Quick Info */}
                             <div className="space-y-8">
                                 <FadeUpReveal>
-                                    <div className="flex items-center gap-3 mb-4">
-                                        <span className="px-3 py-1 rounded-full bg-secondary/20 text-secondary text-xs font-bold uppercase tracking-widest">
+                                    <div className="mb-4 flex items-center gap-3">
+                                        <span className="rounded-full bg-secondary/20 px-3 py-1 text-xs font-bold tracking-widest text-secondary uppercase">
                                             {car.type}
                                         </span>
-                                        <span className="px-3 py-1 rounded-full bg-green-500/20 text-green-400 text-xs font-bold uppercase tracking-widest">
+                                        <span className="rounded-full bg-green-500/20 px-3 py-1 text-xs font-bold tracking-widest text-green-400 uppercase">
                                             Available Now
                                         </span>
                                     </div>
                                 </FadeUpReveal>
 
                                 <div>
-                                    <p className="text-secondary text-sm font-black uppercase tracking-[0.3em] mb-2">
-                                        {car.brand}
-                                    </p>
-                                    <h1 className="text-5xl md:text-7xl font-black uppercase text-white leading-[0.9] tracking-tight">
+                                    <p className="mb-2 text-sm font-black tracking-[0.3em] text-secondary uppercase">{car.brand}</p>
+                                    <h1 className="text-5xl leading-[0.9] font-black tracking-tight text-white uppercase md:text-7xl">
                                         <TextReveal delay={0.1}>{car.name}</TextReveal>
                                     </h1>
-                                    <p className="text-white/40 text-2xl font-light mt-2">{car.year}</p>
+                                    <p className="mt-2 text-2xl font-light text-white/40">{car.year}</p>
                                 </div>
 
                                 <FadeUpReveal delay={0.3}>
-                                    <p className="text-white/60 text-lg leading-relaxed italic max-w-md">
+                                    <p className="max-w-md text-lg leading-relaxed text-white/60 italic">
                                         "{car.description || `Experience the ultimate in luxury and performance with the ${car.name}.`}"
                                     </p>
                                 </FadeUpReveal>
@@ -118,20 +106,20 @@ export default function CarShow({ car, relatedCars, bookedDates = [] }: CarShowP
                                 {/* Quick Specs */}
                                 <FadeUpReveal delay={0.4}>
                                     <div className="grid grid-cols-3 gap-4">
-                                        <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-4 text-center">
-                                            <Users className="w-6 h-6 text-secondary mx-auto mb-2" />
-                                            <p className="text-white font-bold">{car.seats}</p>
-                                            <p className="text-white/40 text-xs uppercase tracking-widest">Seats</p>
+                                        <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-center backdrop-blur-md">
+                                            <Users className="mx-auto mb-2 h-6 w-6 text-secondary" />
+                                            <p className="font-bold text-white">{car.seats}</p>
+                                            <p className="text-xs tracking-widest text-white/40 uppercase">Seats</p>
                                         </div>
-                                        <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-4 text-center">
-                                            <Settings className="w-6 h-6 text-secondary mx-auto mb-2" />
-                                            <p className="text-white font-bold">{car.transmission}</p>
-                                            <p className="text-white/40 text-xs uppercase tracking-widest">Gearbox</p>
+                                        <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-center backdrop-blur-md">
+                                            <Settings className="mx-auto mb-2 h-6 w-6 text-secondary" />
+                                            <p className="font-bold text-white">{car.transmission}</p>
+                                            <p className="text-xs tracking-widest text-white/40 uppercase">Gearbox</p>
                                         </div>
-                                        <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-4 text-center">
-                                            <Fuel className="w-6 h-6 text-secondary mx-auto mb-2" />
-                                            <p className="text-white font-bold">{car.fuel}</p>
-                                            <p className="text-white/40 text-xs uppercase tracking-widest">Fuel</p>
+                                        <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-center backdrop-blur-md">
+                                            <Fuel className="mx-auto mb-2 h-6 w-6 text-secondary" />
+                                            <p className="font-bold text-white">{car.fuel}</p>
+                                            <p className="text-xs tracking-widest text-white/40 uppercase">Fuel</p>
                                         </div>
                                     </div>
                                 </FadeUpReveal>
@@ -140,7 +128,7 @@ export default function CarShow({ car, relatedCars, bookedDates = [] }: CarShowP
                                 <FadeUpReveal delay={0.5}>
                                     <div className="flex items-end gap-6">
                                         <div>
-                                            <p className="text-white/40 text-sm uppercase tracking-widest">From</p>
+                                            <p className="text-sm tracking-widest text-white/40 uppercase">From</p>
                                             <p className="text-4xl font-black text-white">
                                                 €{car.price.toLocaleString()}
                                                 <span className="text-lg font-normal text-white/40">/day</span>
@@ -149,19 +137,18 @@ export default function CarShow({ car, relatedCars, bookedDates = [] }: CarShowP
 
                                         <div className="flex gap-3">
                                             <Link href={`/booking/create?car_id=${car.id}`}>
-                                                <MagneticButton className="h-14 px-8 bg-secondary text-white font-bold uppercase tracking-widest rounded-xl">
-                                                    <Sparkles className="w-4 h-4 mr-2" />
+                                                <MagneticButton className="h-14 rounded-xl bg-secondary px-8 font-bold tracking-widest text-white uppercase">
+                                                    <Sparkles className="mr-2 h-4 w-4" />
                                                     Book Now
                                                 </MagneticButton>
                                             </Link>
                                             <button
                                                 onClick={() => setWishlisted(!wishlisted)}
-                                                className={`w-14 h-14 rounded-xl flex items-center justify-center transition-all ${wishlisted
-                                                    ? "bg-red-500 text-white"
-                                                    : "bg-white/10 text-white hover:bg-white/20"
-                                                    }`}
+                                                className={`flex h-14 w-14 items-center justify-center rounded-xl transition-all ${
+                                                    wishlisted ? 'bg-red-500 text-white' : 'bg-white/10 text-white hover:bg-white/20'
+                                                }`}
                                             >
-                                                <Heart className={`w-6 h-6 ${wishlisted ? "fill-current" : ""}`} />
+                                                <Heart className={`h-6 w-6 ${wishlisted ? 'fill-current' : ''}`} />
                                             </button>
                                         </div>
                                     </div>
@@ -169,7 +156,7 @@ export default function CarShow({ car, relatedCars, bookedDates = [] }: CarShowP
 
                                 {/* Compare */}
                                 <FadeUpReveal delay={0.6}>
-                                    <div className="flex items-center gap-4 pt-4 border-t border-white/10">
+                                    <div className="flex items-center gap-4 border-t border-white/10 pt-4">
                                         <CompareButton car={car} />
                                     </div>
                                 </FadeUpReveal>
@@ -178,28 +165,20 @@ export default function CarShow({ car, relatedCars, bookedDates = [] }: CarShowP
                             {/* Right: Gallery */}
                             <div className="space-y-4">
                                 <div className="space-y-4">
-                                    <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-card">
-                                        <img
-                                            src={displayImages[currentImage]}
-                                            alt={car.name}
-                                            className="w-full h-full object-cover"
-                                        />
-                                        <div className="absolute bottom-4 left-4 right-4 flex justify-between">
+                                    <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-card">
+                                        <img src={displayImages[currentImage]} alt={car.name} className="h-full w-full object-cover" />
+                                        <div className="absolute right-4 bottom-4 left-4 flex justify-between">
                                             <button
-                                                onClick={() =>
-                                                    setCurrentImage((p) => (p === 0 ? displayImages.length - 1 : p - 1))
-                                                }
-                                                className="w-10 h-10 rounded-full bg-black/50 text-white flex items-center justify-center"
+                                                onClick={() => setCurrentImage((p) => (p === 0 ? displayImages.length - 1 : p - 1))}
+                                                className="flex h-10 w-10 items-center justify-center rounded-full bg-black/50 text-white"
                                             >
-                                                <ChevronLeft className="w-5 h-5" />
+                                                <ChevronLeft className="h-5 w-5" />
                                             </button>
                                             <button
-                                                onClick={() =>
-                                                    setCurrentImage((p) => (p + 1) % displayImages.length)
-                                                }
-                                                className="w-10 h-10 rounded-full bg-black/50 text-white flex items-center justify-center"
+                                                onClick={() => setCurrentImage((p) => (p + 1) % displayImages.length)}
+                                                className="flex h-10 w-10 items-center justify-center rounded-full bg-black/50 text-white"
                                             >
-                                                <ChevronRight className="w-5 h-5" />
+                                                <ChevronRight className="h-5 w-5" />
                                             </button>
                                         </div>
                                     </div>
@@ -208,10 +187,11 @@ export default function CarShow({ car, relatedCars, bookedDates = [] }: CarShowP
                                             <button
                                                 key={i}
                                                 onClick={() => setCurrentImage(i)}
-                                                className={`aspect-video rounded-lg overflow-hidden border-2 ${currentImage === i ? "border-secondary" : "border-transparent opacity-60"
-                                                    }`}
+                                                className={`aspect-video overflow-hidden rounded-lg border-2 ${
+                                                    currentImage === i ? 'border-secondary' : 'border-transparent opacity-60'
+                                                }`}
                                             >
-                                                <img src={img} alt="" className="w-full h-full object-cover" />
+                                                <img src={img} alt="" className="h-full w-full object-cover" />
                                             </button>
                                         ))}
                                     </div>
@@ -222,47 +202,45 @@ export default function CarShow({ car, relatedCars, bookedDates = [] }: CarShowP
                 </div>
 
                 {/* Content Sections */}
-                <div className="max-w-[1440px] mx-auto px-6 py-16">
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+                <div className="mx-auto max-w-[1440px] px-6 py-16">
+                    <div className="grid grid-cols-1 gap-12 lg:grid-cols-3">
                         {/* Main Content */}
-                        <div className="lg:col-span-2 space-y-12">
+                        <div className="space-y-12 lg:col-span-2">
                             {/* Specs & Features Tabs */}
                             <Tabs defaultValue="specs" className="w-full">
-                                <TabsList className="w-full justify-start bg-transparent border-b border-border rounded-none h-12 p-0 gap-8">
+                                <TabsList className="h-12 w-full justify-start gap-8 rounded-none border-b border-border bg-transparent p-0">
                                     <TabsTrigger
                                         value="specs"
-                                        className="rounded-none border-b-2 border-transparent data-[state=active]:border-secondary data-[state=active]:bg-transparent font-bold uppercase tracking-widest text-xs text-muted-foreground"
+                                        className="rounded-none border-b-2 border-transparent text-xs font-bold tracking-widest text-muted-foreground uppercase data-[state=active]:border-secondary data-[state=active]:bg-transparent"
                                     >
                                         Performance
                                     </TabsTrigger>
                                     <TabsTrigger
                                         value="features"
-                                        className="rounded-none border-b-2 border-transparent data-[state=active]:border-secondary data-[state=active]:bg-transparent font-bold uppercase tracking-widest text-xs text-muted-foreground"
+                                        className="rounded-none border-b-2 border-transparent text-xs font-bold tracking-widest text-muted-foreground uppercase data-[state=active]:border-secondary data-[state=active]:bg-transparent"
                                     >
                                         Features
                                     </TabsTrigger>
                                 </TabsList>
 
-                                <TabsContent value="specs" className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-8">
+                                <TabsContent value="specs" className="mt-8 grid grid-cols-2 gap-8 md:grid-cols-4">
                                     {[
-                                        { label: "Engine", value: car.engine || "3.0L" },
-                                        { label: "Power", value: car.power || "350 HP" },
-                                        { label: "Top Speed", value: car.topSpeed || "250 km/h" },
-                                        { label: "0-100 km/h", value: car.acceleration || "5.0s" },
+                                        { label: 'Engine', value: car.engine || '3.0L' },
+                                        { label: 'Power', value: car.power || '350 HP' },
+                                        { label: 'Top Speed', value: car.topSpeed || '250 km/h' },
+                                        { label: '0-100 km/h', value: car.acceleration || '5.0s' },
                                     ].map((spec, i) => (
                                         <div key={i}>
-                                            <p className="text-secondary text-[10px] font-black uppercase tracking-widest mb-1">
-                                                {spec.label}
-                                            </p>
+                                            <p className="mb-1 text-[10px] font-black tracking-widest text-secondary uppercase">{spec.label}</p>
                                             <p className="text-2xl font-black">{spec.value}</p>
                                         </div>
                                     ))}
                                 </TabsContent>
 
-                                <TabsContent value="features" className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <TabsContent value="features" className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4">
                                     {(car.features || ['Leather Interior', 'GPS Navigation', 'Premium Sound']).map((f, i) => (
                                         <div key={i} className="flex items-center gap-3">
-                                            <Check className="w-4 h-4 text-secondary" />
+                                            <Check className="h-4 w-4 text-secondary" />
                                             <span className="text-sm">{f}</span>
                                         </div>
                                     ))}
@@ -270,13 +248,12 @@ export default function CarShow({ car, relatedCars, bookedDates = [] }: CarShowP
                             </Tabs>
 
                             {/* Trust */}
-                            <div className="flex items-center gap-6 p-6 rounded-2xl bg-muted/50 border border-border">
-                                <Shield className="w-12 h-12 text-secondary" />
+                            <div className="flex items-center gap-6 rounded-2xl border border-border bg-muted/50 p-6">
+                                <Shield className="h-12 w-12 text-secondary" />
                                 <div>
-                                    <h4 className="font-bold text-lg">Platinum Protection Included</h4>
+                                    <h4 className="text-lg font-bold">Platinum Protection Included</h4>
                                     <p className="text-muted-foreground">
-                                        Full insurance coverage, 24/7 roadside assistance, and free cancellation up to 24h
-                                        before pickup.
+                                        Full insurance coverage, 24/7 roadside assistance, and free cancellation up to 24h before pickup.
                                     </p>
                                 </div>
                             </div>
@@ -287,12 +264,12 @@ export default function CarShow({ car, relatedCars, bookedDates = [] }: CarShowP
                             <AvailabilityCalendar basePrice={car.price} bookedDates={bookedDates} className="sticky top-24" />
 
                             <div className="grid grid-cols-2 gap-3">
-                                <Button variant="outline" className="h-14 uppercase text-xs font-black">
-                                    <Phone className="w-4 h-4 mr-2" />
+                                <Button variant="outline" className="h-14 text-xs font-black uppercase">
+                                    <Phone className="mr-2 h-4 w-4" />
                                     Call Agent
                                 </Button>
-                                <Button className="h-14 bg-green-600 hover:bg-green-700 text-white uppercase text-xs font-black">
-                                    <FaWhatsapp className="w-5 h-5 mr-2" />
+                                <Button className="h-14 bg-green-600 text-xs font-black text-white uppercase hover:bg-green-700">
+                                    <FaWhatsapp className="mr-2 h-5 w-5" />
                                     WhatsApp
                                 </Button>
                             </div>
